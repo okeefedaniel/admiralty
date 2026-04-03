@@ -1,0 +1,112 @@
+{% extends foia_base_template %}
+
+{% block title %}Determination — {{ foia.request_number }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h1 class="h3 mb-1">Attorney Determination</h1>
+        <p class="text-muted mb-0">
+          <a href="{% url 'foia:request_detail' foia.pk %}">{{ foia.request_number }}</a> —
+          <a href="{% url 'foia:search_results' foia.pk %}">Search Results</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Record Content (left) -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              {% if result.record_type == 'interaction' %}<i class="bi bi-chat-dots text-primary me-2"></i>Interaction
+              {% elif result.record_type == 'note' %}<i class="bi bi-journal-text text-secondary me-2"></i>Note
+              {% else %}{{ result.record_type }}{% endif %}
+            </h5>
+            <div>
+              {% if result.pre_classification == 'likely_responsive' %}
+              <span class="badge bg-success-subtle text-success">Likely Responsive</span>
+              {% elif result.pre_classification == 'likely_exempt' %}
+              <span class="badge bg-warning-subtle text-warning">Likely Exempt</span>
+              {% elif result.pre_classification == 'needs_review' %}
+              <span class="badge bg-primary-subtle text-primary">Needs Review</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="fw-semibold mb-2">{{ result.record_description }}</p>
+            <div class="bg-light rounded p-3 small" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;">{{ result.snapshot_content }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Determination Form (right) -->
+      <div class="col-lg-6">
+        <form method="post">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>
+          {% endif %}
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent"><h5 class="mb-0">Decision</h5></div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="id_decision" class="form-label required">Determination</label>
+                {{ form.decision }}
+                <small class="form-text text-muted">
+                  <strong>Release</strong> — Full disclosure.
+                  <strong>Withhold</strong> — Exempt from disclosure.
+                  <strong>Partial</strong> — Release with redactions.
+                  <strong>Refer</strong> — Belongs to another agency.
+                </small>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_justification" class="form-label">Legal Justification</label>
+                {{ form.justification }}
+              </div>
+
+              <div class="mb-3" id="redacted-section">
+                <label for="id_redacted_content" class="form-label">Redacted Content</label>
+                {{ form.redacted_content }}
+                <small class="form-text text-muted">For partial release: paste the content with redactions applied.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0">Statutory Exemptions Claimed</h5>
+            </div>
+            <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+              {% for ex in exemptions %}
+              <div class="form-check mb-2">
+                <input type="checkbox" name="exemptions" value="{{ ex.pk }}" id="ex_{{ ex.pk }}"
+                       class="form-check-input"
+                       {% if ex in form.initial.exemptions %}checked{% endif %}>
+                <label for="ex_{{ ex.pk }}" class="form-check-label">
+                  <strong>{{ ex.subdivision }}</strong> — {{ ex.label }}
+                  <br><small class="text-muted">{{ ex.citation }}</small>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'foia:search_results' foia.pk %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i>Back to Results
+            </a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Saving...">
+              <i class="bi bi-check-lg me-2"></i>Save Determination
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

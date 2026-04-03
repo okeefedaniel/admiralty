@@ -1,0 +1,92 @@
+{% extends foia_base_template %}
+
+{% block title %}{% if object %}Edit Appeal{% else %}Record Appeal{% endif %} — {{ foia.request_number }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-1">{% if object %}Edit Appeal{% else %}Record Appeal{% endif %}</h1>
+    <p class="text-muted mb-4">
+      <a href="{% url 'foia:request_detail' foia.pk %}">{{ foia.request_number }}</a> — {{ foia.subject }}
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>
+      {% endif %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Appeal Details</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="id_appeal_number" class="form-label">Appeal Number</label>
+              {{ form.appeal_number }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_appeal_status" class="form-label">Status</label>
+              {{ form.appeal_status }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_filed_date" class="form-label required">Date Filed</label>
+              {{ form.filed_date }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="id_appellant_arguments" class="form-label">Appellant's Arguments</label>
+            {{ form.appellant_arguments }}
+          </div>
+          <div class="mb-3">
+            <label for="id_agency_response" class="form-label">Agency Response</label>
+            {{ form.agency_response }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Hearing</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_hearing_date" class="form-label">Hearing Date</label>
+              {{ form.hearing_date }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="id_hearing_notes" class="form-label">Hearing Notes</label>
+            {{ form.hearing_notes }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Decision</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_decision_date" class="form-label">Decision Date</label>
+              {{ form.decision_date }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="id_decision_summary" class="form-label">Decision Summary</label>
+            {{ form.decision_summary }}
+          </div>
+          <div class="mb-3">
+            <label for="id_lessons_learned" class="form-label">Lessons Learned</label>
+            {{ form.lessons_learned }}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'foia:request_detail' foia.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving...">
+          <i class="bi bi-check-lg me-2"></i>{% if object %}Save Changes{% else %}Record Appeal{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

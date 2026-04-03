@@ -1,0 +1,171 @@
+{% extends foia_base_template %}
+
+{% block title %}FOIA Dashboard — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">FOIA Dashboard</h1>
+  <div class="d-flex gap-2">
+    <a href="{% url 'foia:exemption_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-book me-1"></i>Exemptions
+    </a>
+    <a href="{% url 'foia:review_queue' %}" class="btn btn-outline-primary">
+      <i class="bi bi-shield-check me-1"></i>Review Queue
+    </a>
+    <a href="{% url 'foia:request_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>New Request
+    </a>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body py-3 text-center">
+        <h2 class="mb-0">{{ total }}</h2>
+        <small class="text-muted">Total Requests</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100 border-start border-warning border-3">
+      <div class="card-body py-3 text-center">
+        <h2 class="mb-0 text-warning">{{ open }}</h2>
+        <small class="text-muted">Open</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100 border-start border-danger border-3">
+      <div class="card-body py-3 text-center">
+        <h2 class="mb-0 text-danger">{{ overdue }}</h2>
+        <small class="text-muted">Past Deadline</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">
+      <div class="card-body py-3 text-center">
+        <h2 class="mb-0 text-primary">{{ pending_review }}</h2>
+        <small class="text-muted">Pending Attorney Review</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Zone Distribution -->
+{% if zone_total > 0 %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-transparent"><h5 class="mb-0">Zone Distribution</h5></div>
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <small class="text-muted fw-semibold" style="min-width: 80px;">{{ zone_total }} records</small>
+      <div class="zone-bar flex-grow-1">
+        {% if zone_shared_pct > 0 %}
+        <div class="zone-bar-segment zone-bar-segment--shared" style="width: {{ zone_shared_pct }}%;"
+             title="Zone 1 Shared: {{ zone_shared_count }} ({{ zone_shared_pct }}%)"></div>
+        {% endif %}
+        {% if zone_decd_pct > 0 %}
+        <div class="zone-bar-segment zone-bar-segment--decd" style="width: {{ zone_decd_pct }}%;"
+             title="Zone 2 Agency Internal: {{ zone_decd_count }} ({{ zone_decd_pct }}%)"></div>
+        {% endif %}
+        {% if zone_act_pct > 0 %}
+        <div class="zone-bar-segment zone-bar-segment--act" style="width: {{ zone_act_pct }}%;"
+             title="Zone 3 Excluded: {{ zone_act_count }} ({{ zone_act_pct }}%)"></div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="row g-3 text-center">
+      <div class="col-4">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="zone-bar-legend zone-bar-legend--shared"></span>
+          <div>
+            <strong>{{ zone_shared_count }}</strong>
+            <small class="text-muted d-block">Zone 1 &mdash; Shared</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="zone-bar-legend zone-bar-legend--decd"></span>
+          <div>
+            <strong>{{ zone_decd_count }}</strong>
+            <small class="text-muted d-block">Zone 2 &mdash; Agency</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="zone-bar-legend zone-bar-legend--act"></span>
+          <div>
+            <strong>{{ zone_act_count }}</strong>
+            <small class="text-muted d-block">Zone 3 &mdash; Excluded</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <!-- My Assigned Requests -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-transparent"><h5 class="mb-0">My Assigned Requests</h5></div>
+      {% if my_assigned %}
+      <div class="list-group list-group-flush">
+        {% for req in my_assigned %}
+        <a href="{% url 'foia:request_detail' req.pk %}" class="list-group-item list-group-item-action">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong>{{ req.request_number }}</strong>
+              <span class="badge badge-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
+              <br><small class="text-muted">{{ req.subject|truncatewords:8 }}</small>
+            </div>
+            <div class="text-end">
+              {% if req.statutory_deadline %}
+              <small class="{% if req.statutory_deadline < today %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                {{ req.statutory_deadline|date:"M d" }}
+              </small>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-center text-muted py-4">No requests assigned to you.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Requests -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Requests</h5>
+        <a href="{% url 'foia:request_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      {% if recent %}
+      <div class="list-group list-group-flush">
+        {% for req in recent %}
+        <a href="{% url 'foia:request_detail' req.pk %}" class="list-group-item list-group-item-action">
+          <div class="d-flex justify-content-between">
+            <div>
+              <strong>{{ req.request_number }}</strong> — {{ req.subject|truncatewords:8 }}
+              <span class="badge badge-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
+            </div>
+            <small class="text-muted">{{ req.date_received|date:"M d" }}</small>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-center text-muted py-4">No FOIA requests yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

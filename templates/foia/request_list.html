@@ -1,0 +1,73 @@
+{% extends foia_base_template %}
+
+{% block title %}FOIA Requests — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">FOIA Requests</h1>
+  <div>
+    <a href="{% url 'foia:dashboard' %}" class="btn btn-outline-secondary me-2">
+      <i class="bi bi-graph-up me-1"></i>Dashboard
+    </a>
+    <a href="{% url 'foia:request_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-2"></i>New Request
+    </a>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body py-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="Search FOIA requests..." value="{{ q }}">
+      </div>
+      <div class="col-md-4">
+        <select name="status" class="form-select">
+          <option value="">All statuses</option>
+          {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search me-1"></i>Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if requests %}
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Request #</th><th>Subject</th><th>Status</th><th>Priority</th><th>Received</th><th>Deadline</th><th>Assigned</th></tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+        <tr>
+          <td><a href="{% url 'foia:request_detail' req.pk %}" class="fw-semibold text-decoration-none">{{ req.request_number }}</a></td>
+          <td>{{ req.subject|truncatewords:8 }}</td>
+          <td><span class="badge badge-{{ req.status }}">{{ req.get_status_display }}</span></td>
+          <td>
+            {% if req.priority == 'urgent' %}<span class="badge bg-danger">Urgent</span>
+            {% elif req.priority == 'high' %}<span class="badge bg-warning text-dark">High</span>
+            {% else %}<span class="text-muted">{{ req.get_priority_display }}</span>{% endif %}
+          </td>
+          <td class="text-muted">{{ req.date_received|date:"M d, Y" }}</td>
+          <td class="{% if req.statutory_deadline %}text-muted{% endif %}">{{ req.statutory_deadline|date:"M d, Y"|default:"—" }}</td>
+          <td class="text-muted">{{ req.assigned_to|default:"Unassigned" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-shield-check d-block"></i>
+  <h5>No FOIA requests</h5>
+  <p class="text-muted">No requests match your filters.</p>
+</div>
+{% endif %}
+{% endblock %}

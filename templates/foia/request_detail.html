@@ -1,0 +1,292 @@
+{% extends foia_base_template %}
+
+{% block title %}{{ foia.request_number }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ foia.request_number }}</h1>
+    <p class="text-muted mb-0">
+      <span class="badge badge-{{ foia.status }}">{{ foia.get_status_display }}</span>
+      {% if foia.priority == 'urgent' %}<span class="badge bg-danger ms-1">Urgent</span>
+      {% elif foia.priority == 'high' %}<span class="badge bg-warning text-dark ms-1">High</span>{% endif %}
+      <span class="ms-2">Received {{ foia.date_received|date:"M d, Y" }}</span>
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'foia:request_edit' foia.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+  </div>
+</div>
+
+<!-- Workflow Status Bar -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body py-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">Workflow</h6>
+      <div class="d-flex gap-2">
+        {% for t in transitions %}
+        <form method="post" action="{% url 'foia:transition' foia.pk %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="target_status" value="{{ t.to_status }}">
+          <button type="submit" class="btn btn-sm btn-outline-primary" data-loading-text="Updating...">
+            {{ t.label|default:t.to_status }}
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="progress" style="height: 6px;">
+      {% with status_index=foia.status %}
+      <div class="progress-bar" role="progressbar"
+           style="width: {% if status_index == 'received' %}10{% elif status_index == 'scope_defined' %}25{% elif status_index == 'searching' %}40{% elif status_index == 'under_review' %}55{% elif status_index == 'package_ready' %}70{% elif status_index == 'senior_review' %}85{% elif status_index == 'responded' %}100{% elif status_index == 'closed' %}100{% else %}50{% endif %}%">
+      </div>
+      {% endwith %}
+    </div>
+    <div class="d-flex justify-content-between mt-1">
+      <small class="text-muted">Received</small>
+      <small class="text-muted">Scope</small>
+      <small class="text-muted">Search</small>
+      <small class="text-muted">Review</small>
+      <small class="text-muted">Package</small>
+      <small class="text-muted">Senior</small>
+      <small class="text-muted">Done</small>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- Request Description -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h5 class="mb-0">{{ foia.subject }}</h5></div>
+      <div class="card-body">
+        {{ foia.description|linebreaks }}
+      </div>
+    </div>
+
+    <!-- Workflow Action Cards -->
+    {% if foia.status == 'received' or not scope %}
+    <div class="card border-0 shadow-sm mb-4 border-start border-primary border-3">
+      <div class="card-body">
+        <h6><i class="bi bi-search me-2 text-primary"></i>Step 1: Define Search Scope</h6>
+        <p class="text-muted mb-3">Set the date range, keywords, company names, and record types to search.</p>
+        <a href="{% url 'foia:scope' foia.pk %}" class="btn btn-primary">
+          <i class="bi bi-sliders me-1"></i>{% if scope %}Edit Scope{% else %}Define Scope{% endif %}
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if scope and foia.status in 'scope_defined,searching' %}
+    <div class="card border-0 shadow-sm mb-4 border-start border-success border-3">
+      <div class="card-body">
+        <h6><i class="bi bi-database-gear me-2 text-success"></i>Step 2: Run Search</h6>
+        <p class="text-muted mb-3">Search all interactions and notes matching the scope. Zone 3 (Quasi Private) records are excluded.</p>
+        <div class="d-flex gap-2">
+          <form method="post" action="{% url 'foia:run_search' foia.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" data-loading-text="Searching...">
+              <i class="bi bi-play me-1"></i>Run Search
+            </button>
+          </form>
+          <a href="{% url 'foia:scope' foia.pk %}" class="btn btn-outline-secondary">Edit Scope</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if results_count %}
+    <!-- Search Results Summary -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Search Results <span class="badge bg-secondary ms-1">{{ results_count }}</span></h5>
+        <a href="{% url 'foia:search_results' foia.pk %}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-eye me-1"></i>Review All
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 text-center">
+          <div class="col-3">
+            <h4 class="mb-0 text-success">{{ likely_responsive }}</h4>
+            <small class="text-muted">Likely Responsive</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0 text-warning">{{ likely_exempt }}</h4>
+            <small class="text-muted">Likely Exempt</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0 text-primary">{{ needs_review }}</h4>
+            <small class="text-muted">Needs Review</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0">{{ results_reviewed }} / {{ results_count }}</h4>
+            <small class="text-muted">Determined</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if response_package %}
+    <!-- Response Package -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h5 class="mb-0">Response Package</h5></div>
+      <div class="card-body">
+        <div class="row g-3 text-center mb-3">
+          <div class="col-3">
+            <h4 class="mb-0">{{ response_package.total_records_found }}</h4>
+            <small class="text-muted">Total Found</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0 text-success">{{ response_package.records_released }}</h4>
+            <small class="text-muted">Released</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0 text-danger">{{ response_package.records_withheld }}</h4>
+            <small class="text-muted">Withheld</small>
+          </div>
+          <div class="col-3">
+            <h4 class="mb-0 text-warning">{{ response_package.records_partially_released }}</h4>
+            <small class="text-muted">Partial</small>
+          </div>
+        </div>
+        <small class="text-muted">Compiled {{ response_package.generated_at|date:"M d, Y g:i A" }} by {{ response_package.generated_by }}</small>
+      </div>
+    </div>
+    {% elif foia.status == 'under_review' and results_count %}
+    <div class="card border-0 shadow-sm mb-4 border-start border-warning border-3">
+      <div class="card-body">
+        <h6><i class="bi bi-box-seam me-2 text-warning"></i>Step 4: Compile Response</h6>
+        <p class="text-muted mb-3">After all determinations are made, compile the response package.</p>
+        <form method="post" action="{% url 'foia:compile_response' foia.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning" data-loading-text="Compiling...">
+            <i class="bi bi-box-seam me-1"></i>Compile Response Package
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Appeals -->
+    {% if appeals %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Appeals</h5>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for appeal in appeals %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div>
+              <strong>{{ appeal.appeal_number|default:"Appeal" }}</strong>
+              <span class="badge badge-{{ appeal.appeal_status }} ms-2">{{ appeal.get_appeal_status_display }}</span>
+            </div>
+            <div>
+              <small class="text-muted">Filed {{ appeal.filed_date|date:"M d, Y" }}</small>
+              <a href="{% url 'foia:appeal_edit' appeal.pk %}" class="btn btn-sm btn-outline-secondary ms-2">Edit</a>
+            </div>
+          </div>
+          {% if appeal.appellant_arguments %}<p class="text-muted small mt-1 mb-0">{{ appeal.appellant_arguments|truncatewords:30 }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if foia.status == 'responded' %}
+    <div class="mb-4">
+      <a href="{% url 'foia:appeal_create' foia.pk %}" class="btn btn-outline-danger">
+        <i class="bi bi-exclamation-triangle me-1"></i>Record Appeal
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h6 class="mb-0">Requester</h6></div>
+      <div class="card-body">
+        <dl class="mb-0">
+          <dt class="small text-muted">Name</dt><dd>{{ foia.requester_name }}</dd>
+          {% if foia.requester_organization %}<dt class="small text-muted">Organization</dt><dd>{{ foia.requester_organization }}</dd>{% endif %}
+          {% if foia.requester_email %}<dt class="small text-muted">Email</dt><dd><a href="mailto:{{ foia.requester_email }}">{{ foia.requester_email }}</a></dd>{% endif %}
+          {% if foia.requester_phone %}<dt class="small text-muted">Phone</dt><dd>{{ foia.requester_phone }}</dd>{% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h6 class="mb-0">Dates & Deadlines</h6></div>
+      <div class="card-body">
+        <dl class="mb-0">
+          <dt class="small text-muted">Received</dt><dd>{{ foia.date_received|date:"M d, Y" }}</dd>
+          {% if foia.statutory_deadline %}
+          <dt class="small text-muted">Statutory Deadline</dt>
+          <dd class="{% if foia.statutory_deadline < today %}text-danger fw-bold{% endif %}">
+            {{ foia.statutory_deadline|date:"M d, Y" }}
+          </dd>
+          {% endif %}
+          {% if foia.date_responded %}<dt class="small text-muted">Responded</dt><dd>{{ foia.date_responded|date:"M d, Y" }}</dd>{% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h6 class="mb-0">Assignment</h6></div>
+      <div class="card-body">
+        <dl class="mb-0">
+          <dt class="small text-muted">Assigned To</dt><dd>{{ foia.assigned_to|default:"Unassigned" }}</dd>
+          <dt class="small text-muted">Reviewing Attorney</dt><dd>{{ foia.reviewing_attorney|default:"Not assigned" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    {% if scope %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Search Scope</h6>
+        <a href="{% url 'foia:scope' foia.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      </div>
+      <div class="card-body small">
+        {% if scope.date_range_start or scope.date_range_end %}
+        <p class="mb-1"><strong>Date range:</strong> {{ scope.date_range_start|date:"M d, Y"|default:"any" }} — {{ scope.date_range_end|date:"M d, Y"|default:"any" }}</p>
+        {% endif %}
+        {% if scope.keywords %}<p class="mb-1"><strong>Keywords:</strong> {{ scope.keywords|join:", " }}</p>{% endif %}
+        {% if scope.company_names %}<p class="mb-1"><strong>Companies:</strong> {{ scope.company_names|join:", " }}</p>{% endif %}
+        {% if scope.contact_names %}<p class="mb-1"><strong>Contacts:</strong> {{ scope.contact_names|join:", " }}</p>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if foia.related_companies.all %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent"><h6 class="mb-0">Related Companies</h6></div>
+      <div class="card-body">
+        {% for company in foia.related_companies.all %}
+        <span class="badge bg-primary-subtle text-primary me-1 mb-1">{{ company.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Statutory Exemptions Reference -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-transparent">
+        <h6 class="mb-0"><i class="bi bi-book me-1"></i>Exemption Reference</h6>
+      </div>
+      <div class="card-body small" style="max-height: 300px; overflow-y: auto;">
+        {% for ex in exemptions %}
+        <div class="mb-2 pb-2 {% if not forloop.last %}border-bottom{% endif %}">
+          <strong>{{ ex.subdivision }}</strong> — {{ ex.label }}
+          <p class="text-muted mb-0 small">{{ ex.citation }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

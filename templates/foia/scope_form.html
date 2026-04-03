@@ -1,0 +1,79 @@
+{% extends foia_base_template %}
+
+{% block title %}Define Scope — {{ foia.request_number }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-1">Define Search Scope</h1>
+    <p class="text-muted mb-4">
+      <a href="{% url 'foia:request_detail' foia.pk %}">{{ foia.request_number }}</a> — {{ foia.subject }}
+    </p>
+
+    <div class="alert alert-info small">
+      <i class="bi bi-info-circle me-2"></i>
+      The search will scan all <strong>Zone 1 (Shared)</strong> and <strong>Zone 2 (Agency Internal)</strong> interactions and notes.
+      <strong>Zone 3 (Quasi Private)</strong> records are automatically excluded from FOIA searches.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>
+      {% endif %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Date Range</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_date_range_start" class="form-label">From</label>
+              {{ form.date_range_start }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="id_date_range_end" class="form-label">To</label>
+              {{ form.date_range_end }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Search Terms</h5></div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="id_keywords_text" class="form-label">Keywords</label>
+            {{ form.keywords_text }}
+            <small class="form-text text-muted">{{ form.keywords_text.help_text }}</small>
+          </div>
+          <div class="mb-3">
+            <label for="id_company_names_text" class="form-label">Company Names</label>
+            {{ form.company_names_text }}
+          </div>
+          <div class="mb-3">
+            <label for="id_contact_names_text" class="form-label">Contact Names</label>
+            {{ form.contact_names_text }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Notes</h5></div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="id_scope_notes" class="form-label">Additional Scope Notes</label>
+            {{ form.scope_notes }}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'foia:request_detail' foia.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving...">
+          <i class="bi bi-check-lg me-2"></i>Save Scope
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

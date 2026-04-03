@@ -1,0 +1,57 @@
+{% extends foia_base_template %}
+
+{% block title %}Edit Exemption {{ exemption.subdivision }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-1">Edit Exemption</h1>
+    <p class="text-muted mb-4">{{ exemption.subdivision }} — {{ exemption.label }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Exemption Details</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="id_subdivision" class="form-label">Subdivision</label>
+              {{ form.subdivision }}
+            </div>
+            <div class="col-md-8 mb-3">
+              <label for="id_label" class="form-label">Label</label>
+              {{ form.label }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="id_citation" class="form-label">Citation</label>
+            {{ form.citation }}
+          </div>
+          <div class="mb-3">
+            <label for="id_statutory_text" class="form-label">Statutory Text</label>
+            {{ form.statutory_text }}
+            <small class="form-text text-muted">The exact statutory language. Update to reflect current law.</small>
+          </div>
+          <div class="mb-3">
+            <label for="id_guidance_notes" class="form-label">Attorney Guidance Notes</label>
+            {{ form.guidance_notes }}
+            <small class="form-text text-muted">Internal guidance for attorneys applying this exemption. Include relevant FOI Commission rulings.</small>
+          </div>
+          <div class="form-check">
+            {{ form.is_active }}
+            <label for="id_is_active" class="form-check-label">Active (available for use in determinations)</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'foia:exemption_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving...">
+          <i class="bi bi-check-lg me-2"></i>Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

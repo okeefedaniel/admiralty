@@ -1,0 +1,42 @@
+{% extends foia_base_template %}
+
+{% block title %}FOIA Review Queue — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">FOIA Review Queue</h1>
+  <a href="{% url 'foia:request_list' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>All Requests
+  </a>
+</div>
+
+{% if requests %}
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Request #</th><th>Subject</th><th>Status</th><th>Deadline</th><th>Assigned</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+        <tr>
+          <td><a href="{% url 'foia:request_detail' req.pk %}" class="fw-semibold text-decoration-none">{{ req.request_number }}</a></td>
+          <td>{{ req.subject|truncatewords:8 }}</td>
+          <td><span class="badge badge-{{ req.status }}">{{ req.get_status_display }}</span></td>
+          <td class="text-muted">{{ req.statutory_deadline|date:"M d, Y"|default:"—" }}</td>
+          <td class="text-muted">{{ req.assigned_to|default:"Unassigned" }}</td>
+          <td><a href="{% url 'foia:request_detail' req.pk %}" class="btn btn-sm btn-outline-primary">Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-shield-check d-block"></i>
+  <h5>Queue is clear</h5>
+  <p class="text-muted">No FOIA requests currently need review.</p>
+</div>
+{% endif %}
+{% endblock %}

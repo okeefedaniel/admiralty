@@ -1,0 +1,108 @@
+{% extends foia_base_template %}
+
+{% block title %}{% if object %}Edit FOIA {{ object.request_number }}{% else %}New FOIA Request{% endif %} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-4">{% if object %}Edit {{ object.request_number }}{% else %}New FOIA Request{% endif %}</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>
+      {% endif %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Request Information</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="id_request_number" class="form-label required">Request Number</label>
+              {{ form.request_number }}
+              {% if form.request_number.errors %}<div class="text-danger small">{{ form.request_number.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_status" class="form-label">Status</label>
+              {{ form.status }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_priority" class="form-label">Priority</label>
+              {{ form.priority }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="id_subject" class="form-label required">Subject</label>
+            {{ form.subject }}
+            {% if form.subject.errors %}<div class="text-danger small">{{ form.subject.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label for="id_description" class="form-label required">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_date_received" class="form-label required">Date Received</label>
+              {{ form.date_received }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="id_statutory_deadline" class="form-label">Statutory Deadline</label>
+              {{ form.statutory_deadline }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Requester</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_requester_name" class="form-label required">Name</label>
+              {{ form.requester_name }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="id_requester_organization" class="form-label">Organization</label>
+              {{ form.requester_organization }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_requester_email" class="form-label">Email</label>
+              {{ form.requester_email }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="id_requester_phone" class="form-label">Phone</label>
+              {{ form.requester_phone }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Assignment</h5></div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_assigned_to" class="form-label">Assigned To</label>
+              {{ form.assigned_to }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="id_reviewing_attorney" class="form-label">Reviewing Attorney</label>
+              {{ form.reviewing_attorney }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'foia:request_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving...">
+          <i class="bi bi-check-lg me-2"></i>{% if object %}Save Changes{% else %}Create Request{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

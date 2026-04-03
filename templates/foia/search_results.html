@@ -1,0 +1,326 @@
+{% extends foia_base_template %}
+
+{% block title %}Search Results — {{ foia.request_number }} — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">Search Results</h1>
+    <p class="text-muted mb-0">
+      <a href="{% url 'foia:request_detail' foia.pk %}">{{ foia.request_number }}</a> — {{ foia.subject }}
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="post" action="{% url 'foia:ai_review' foia.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary btn-sm" data-loading-text="AI Reviewing...">
+        <i class="bi bi-stars me-1"></i>AI Review
+      </button>
+    </form>
+    <form method="post" action="{% url 'foia:run_search' foia.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-secondary btn-sm" data-loading-text="Re-searching...">
+        <i class="bi bi-arrow-clockwise me-1"></i>Re-run
+      </button>
+    </form>
+    <a href="{% url 'foia:request_detail' foia.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="card border-0 shadow-sm text-center py-2">
+      <div class="card-body py-2">
+        <h3 class="mb-0">{{ total }}</h3>
+        <small class="text-muted">Total Results</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="card border-0 shadow-sm text-center py-2 border-start border-success border-3">
+      <div class="card-body py-2">
+        <h3 class="mb-0 text-success">{{ determined }}</h3>
+        <small class="text-muted">Determined</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="card border-0 shadow-sm text-center py-2 border-start border-warning border-3">
+      <div class="card-body py-2">
+        <h3 class="mb-0 text-warning">{{ remaining }}</h3>
+        <small class="text-muted">Remaining</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    {% if remaining == 0 and total > 0 %}
+    <form method="post" action="{% url 'foia:compile_response' foia.pk %}" class="h-100">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success w-100 h-100" data-loading-text="Compiling...">
+        <i class="bi bi-box-seam me-2"></i>Compile Response
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if results %}
+<!-- View Toggle -->
+<div class="d-flex justify-content-end mb-3">
+  <div class="btn-group btn-group-sm" role="group" aria-label="View toggle">
+    <button type="button" class="btn btn-outline-secondary active" id="btn-table-view" onclick="toggleView('table')">
+      <i class="bi bi-table me-1"></i>Table View
+    </button>
+    <button type="button" class="btn btn-outline-secondary" id="btn-zone-view" onclick="toggleView('zone')">
+      <i class="bi bi-columns-gap me-1"></i>Zone View
+    </button>
+  </div>
+</div>
+
+<!-- Table View -->
+<div id="view-table">
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Pre-Classification</th>
+            <th>Zone</th>
+            <th>Status</th>
+            {% if ai_review_ran %}<th>AI Flag</th>{% endif %}
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in results %}
+          <tr class="{% if result.has_determination %}table-light{% endif %}{% if result.ai_flag.flag == 'should_release' %} table-success{% elif result.ai_flag.flag == 'should_withhold' %} table-danger{% elif result.ai_flag.flag == 'review_recommended' %} table-warning{% endif %}">
+            <td>
+              {% if result.record_type == 'interaction' %}
+              <i class="bi bi-chat-dots text-primary me-1"></i>Interaction
+              {% elif result.record_type == 'note' %}
+              <i class="bi bi-journal-text text-secondary me-1"></i>Note
+              {% else %}
+              {{ result.record_type }}
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ result.record_description|truncatewords:12 }}</strong>
+              {% if result.snapshot_metadata.company %}
+              <br><small class="text-muted">{{ result.snapshot_metadata.company }}</small>
+              {% endif %}
+              {% if result.snapshot_metadata.date %}
+              <small class="text-muted ms-2">{{ result.snapshot_metadata.date }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if result.pre_classification == 'likely_responsive' %}
+              <span class="badge bg-success-subtle text-success">Likely Responsive</span>
+              {% elif result.pre_classification == 'likely_exempt' %}
+              <span class="badge bg-warning-subtle text-warning">Likely Exempt</span>
+              {% elif result.pre_classification == 'needs_review' %}
+              <span class="badge bg-primary-subtle text-primary">Needs Review</span>
+              {% elif result.pre_classification == 'not_relevant' %}
+              <span class="badge bg-secondary-subtle text-secondary">Not Relevant</span>
+              {% endif %}
+            </td>
+            <td>
+              {% with zone=result.snapshot_metadata.zone %}
+              {% if zone == 'shared' %}<span class="badge bg-success-subtle text-success">Zone 1</span>
+              {% elif zone == 'decd_internal' %}<span class="badge bg-primary-subtle text-primary">Zone 2</span>
+              {% else %}<span class="badge bg-secondary-subtle text-secondary">{{ zone }}</span>{% endif %}
+              {% endwith %}
+            </td>
+            <td>
+              {% if result.has_determination %}
+              <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>Done</span>
+              {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            </td>
+            {% if ai_review_ran %}
+            <td>
+              {% if result.ai_flag.flag == 'should_release' %}
+              <span class="badge bg-success" title="{{ result.ai_flag.flag_reason|default:'' }}">
+                <i class="bi bi-arrow-up me-1"></i>Release?
+              </span>
+              {% elif result.ai_flag.flag == 'should_withhold' %}
+              <span class="badge bg-danger" title="{{ result.ai_flag.flag_reason|default:'' }}">
+                <i class="bi bi-shield-exclamation me-1"></i>Withhold?
+              </span>
+              {% elif result.ai_flag.flag == 'review_recommended' %}
+              <span class="badge bg-warning text-dark" title="{{ result.ai_flag.flag_reason|default:'' }}">
+                <i class="bi bi-eye me-1"></i>Review
+              </span>
+              {% elif result.ai_flag.flag == 'ok' %}
+              <span class="badge bg-secondary-subtle text-secondary"><i class="bi bi-check"></i></span>
+              {% endif %}
+              {% if result.ai_flag.ai_reasoning %}
+              <br><small class="text-muted">{{ result.ai_flag.ai_reasoning|truncatewords:10 }}</small>
+              {% endif %}
+            </td>
+            {% endif %}
+            <td>
+              <a href="{% url 'foia:determination' foia.pk result.pk %}" class="btn btn-sm {% if result.has_determination %}btn-outline-secondary{% else %}btn-outline-primary{% endif %}">
+                {% if result.has_determination %}Review{% else %}Determine{% endif %}
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Zone View -->
+<div id="view-zone" style="display: none;">
+  <div class="row g-4 zone-columns">
+    <!-- Zone 1: Shared -->
+    <div class="col-md-6 col-xl-6">
+      <div class="card border-0 shadow-sm zone-column">
+        <div class="card-header zone-column-header zone-column-header--shared">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+              <i class="bi bi-globe me-2"></i>Zone 1 — Shared
+            </h6>
+            <span class="badge bg-white text-dark">{{ zone_shared_count }}</span>
+          </div>
+        </div>
+        <div class="card-body p-2">
+          {% for result in zone_shared %}
+          <a href="{% url 'foia:determination' foia.pk result.pk %}" class="zone-record-card d-block text-decoration-none">
+            <div class="d-flex align-items-start gap-2">
+              <div class="zone-record-icon">
+                {% if result.record_type == 'interaction' %}
+                <i class="bi bi-chat-dots text-primary"></i>
+                {% elif result.record_type == 'note' %}
+                <i class="bi bi-journal-text text-secondary"></i>
+                {% else %}
+                <i class="bi bi-file-text text-muted"></i>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 min-width-0">
+                <div class="zone-record-desc">{{ result.record_description|truncatewords:10 }}</div>
+                <div class="d-flex gap-1 flex-wrap mt-1">
+                  {% if result.pre_classification == 'likely_responsive' %}
+                  <span class="badge bg-success-subtle text-success zone-record-badge">Responsive</span>
+                  {% elif result.pre_classification == 'likely_exempt' %}
+                  <span class="badge bg-warning-subtle text-warning zone-record-badge">Exempt</span>
+                  {% elif result.pre_classification == 'needs_review' %}
+                  <span class="badge bg-primary-subtle text-primary zone-record-badge">Review</span>
+                  {% elif result.pre_classification == 'not_relevant' %}
+                  <span class="badge bg-secondary-subtle text-secondary zone-record-badge">N/A</span>
+                  {% endif %}
+                  {% if result.has_determination %}
+                  <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
+                  {% else %}
+                  <span class="badge bg-warning text-dark zone-record-badge">Pending</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </a>
+          {% empty %}
+          <div class="text-center text-muted py-3">
+            <i class="bi bi-inbox d-block mb-1"></i>
+            <small>No records in this zone</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 2: Agency Internal -->
+    <div class="col-md-6 col-xl-6">
+      <div class="card border-0 shadow-sm zone-column">
+        <div class="card-header zone-column-header zone-column-header--decd">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+              <i class="bi bi-building me-2"></i>Zone 2 — Agency Internal
+            </h6>
+            <span class="badge bg-white text-dark">{{ zone_decd_count }}</span>
+          </div>
+        </div>
+        <div class="card-body p-2">
+          {% for result in zone_decd %}
+          <a href="{% url 'foia:determination' foia.pk result.pk %}" class="zone-record-card d-block text-decoration-none">
+            <div class="d-flex align-items-start gap-2">
+              <div class="zone-record-icon">
+                {% if result.record_type == 'interaction' %}
+                <i class="bi bi-chat-dots text-primary"></i>
+                {% elif result.record_type == 'note' %}
+                <i class="bi bi-journal-text text-secondary"></i>
+                {% else %}
+                <i class="bi bi-file-text text-muted"></i>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 min-width-0">
+                <div class="zone-record-desc">{{ result.record_description|truncatewords:10 }}</div>
+                <div class="d-flex gap-1 flex-wrap mt-1">
+                  {% if result.pre_classification == 'likely_responsive' %}
+                  <span class="badge bg-success-subtle text-success zone-record-badge">Responsive</span>
+                  {% elif result.pre_classification == 'likely_exempt' %}
+                  <span class="badge bg-warning-subtle text-warning zone-record-badge">Exempt</span>
+                  {% elif result.pre_classification == 'needs_review' %}
+                  <span class="badge bg-primary-subtle text-primary zone-record-badge">Review</span>
+                  {% elif result.pre_classification == 'not_relevant' %}
+                  <span class="badge bg-secondary-subtle text-secondary zone-record-badge">N/A</span>
+                  {% endif %}
+                  {% if result.has_determination %}
+                  <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
+                  {% else %}
+                  <span class="badge bg-warning text-dark zone-record-badge">Pending</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </a>
+          {% empty %}
+          <div class="text-center text-muted py-3">
+            <i class="bi bi-inbox d-block mb-1"></i>
+            <small>No records in this zone</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-search d-block"></i>
+  <h5>No results found</h5>
+  <p class="text-muted">Try broadening your search scope or adjusting the date range.</p>
+  <a href="{% url 'foia:scope' foia.pk %}" class="btn btn-primary">Edit Scope</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleView(view) {
+  var tableView = document.getElementById('view-table');
+  var zoneView = document.getElementById('view-zone');
+  var btnTable = document.getElementById('btn-table-view');
+  var btnZone = document.getElementById('btn-zone-view');
+
+  if (view === 'zone') {
+    tableView.style.display = 'none';
+    zoneView.style.display = 'block';
+    btnTable.classList.remove('active');
+    btnZone.classList.add('active');
+  } else {
+    tableView.style.display = 'block';
+    zoneView.style.display = 'none';
+    btnTable.classList.add('active');
+    btnZone.classList.remove('active');
+  }
+}
+</script>
+{% endblock %}

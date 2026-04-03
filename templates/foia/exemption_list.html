@@ -1,0 +1,49 @@
+{% extends foia_base_template %}
+
+{% block title %}Statutory Exemptions — Beacon CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Statutory Exemptions</h1>
+    <p class="text-muted mb-0">Connecticut § 32-244 and § 1-210(b)(5) exemption categories</p>
+  </div>
+  <a href="{% url 'foia:dashboard' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>FOIA Dashboard
+  </a>
+</div>
+
+<div class="alert alert-info small mb-4">
+  <i class="bi bi-info-circle me-2"></i>
+  These exemptions are referenced during attorney review of FOIA search results.
+  Senior staff can update the statutory text and guidance notes to reflect current interpretations.
+</div>
+
+{% for ex in exemptions %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h5 class="mb-1">{{ ex.subdivision }} — {{ ex.label }}</h5>
+        <p class="small text-muted mb-2">{{ ex.citation }}</p>
+        <p class="mb-2">{{ ex.statutory_text|truncatewords:40 }}</p>
+        {% if ex.guidance_notes %}
+        <div class="bg-light rounded p-2 small">
+          <strong>Guidance:</strong> {{ ex.guidance_notes|truncatewords:30 }}
+        </div>
+        {% endif %}
+      </div>
+      <a href="{% url 'foia:exemption_edit' ex.pk %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-pencil me-1"></i>Edit
+      </a>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="empty-state">
+  <i class="bi bi-book d-block"></i>
+  <h5>No exemptions loaded</h5>
+  <p class="text-muted">Run the statutory exemptions seed script to populate.</p>
+</div>
+{% endfor %}
+{% endblock %}
