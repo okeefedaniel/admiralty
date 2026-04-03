@@ -27,6 +27,7 @@ ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 
 # Demo mode
 DEMO_MODE = os.environ.get('DEMO_MODE', 'False').lower() in ('true', '1', 'yes')
+DEMO_ROLES = ['foia_officer', 'foia_attorney', 'admin']
 DEMO_PASSWORD = os.environ.get('DEMO_PASSWORD', 'demo' + '2026!')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     'keel.core',
     'keel.security',
     'keel.notifications',
+    'keel.comms',
     'keel.requests',
     # Third party
     'crispy_forms',
@@ -252,6 +254,11 @@ KEEL_PRODUCT_SUBTITLE = 'FOIA Request Management'
 KEEL_NOTIFICATION_MODEL = 'core.Notification'
 KEEL_NOTIFICATION_PREFERENCE_MODEL = 'core.NotificationPreference'
 KEEL_NOTIFICATION_LOG_MODEL = 'core.NotificationLog'
+
+# Communications (keel.comms)
+COMMS_MAIL_DOMAIN = os.environ.get('COMMS_MAIL_DOMAIN', 'mail.docklabs.ai')
+COMMS_POSTMARK_SERVER_TOKEN = os.environ.get('COMMS_POSTMARK_SERVER_TOKEN', '')
+COMMS_POSTMARK_WEBHOOK_TOKEN = os.environ.get('COMMS_POSTMARK_WEBHOOK_TOKEN', '')
 KEEL_CSP_POLICY = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'"
 KEEL_ALLOWED_UPLOAD_EXTENSIONS = [
     '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv',
