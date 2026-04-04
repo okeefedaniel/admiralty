@@ -2,7 +2,7 @@
 import os
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
 
@@ -33,6 +33,7 @@ class Command(BaseCommand):
             ))
             return
 
+        User = get_user_model()
         for username, email, first, last, is_staff, is_superuser in DEMO_USERS:
             if User.objects.filter(username=username).exists():
                 user = User.objects.get(username=username)

@@ -17,8 +17,18 @@ logger = logging.getLogger(__name__)
 
 
 def is_beacon():
-    """Return True if running inside Beacon CRM (core app installed)."""
-    return apps.is_installed('core')
+    """Return True if running inside Beacon CRM (not standalone Admiralty).
+
+    We check for the 'core' app *label* (not module name). In Beacon CRM the
+    core app has label='core'; in standalone Admiralty the same Python module
+    is registered with label='admiralty_core' via AdmiraltyConfig.
+    """
+    try:
+        cfg = apps.get_app_config('core')
+        # Only Beacon's core app has label == name == 'core'
+        return cfg.name == 'core' and cfg.label == 'core'
+    except LookupError:
+        return False
 
 
 # ---------------------------------------------------------------------------
