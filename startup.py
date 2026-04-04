@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+"""Railway startup script — run migrations, configure site, collectstatic, then gunicorn."""
+import os
+import subprocess
+import sys
+
+os.environ['PYTHONUNBUFFERED'] = '1'
+
+
+def log(msg):
+    print(f"[startup] {msg}", flush=True)
+
+
+def run(cmd, fatal=False):
+    log(f"Running: {cmd}")
+    result = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr)
+    if result.returncode != 0:
+        log(f"Command exited with code {result.returncode}: {cmd}")
+        if fatal:
+            sys.exit(result.returncode)
+        return False
+    return True
+
+
+def main():
+    log("=" * 50)
+    log("Admiralty — FOIA Request Management")
+    log("Container starting")
+    log("=" * 50)
+
+    port = os.environ.get('PORT', '8080')
+    manage = f"{sys.executable} manage.py"
+
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admiralty_site.settings')
+    import django
+    django.setup()
+
+    log("=== Running migrations ===")
+    run(f"{manage} migrate --noinput", fatal=True)
+
+    # Ensure django.contrib.sites has the correct Site record (required by allauth)
+    log("=== Configuring Site object ===")
+    try:
+        from django.contrib.sites.models import Site
+        domain = os.environ.get('SITE_DOMAIN', 'admiralty.docklabs.ai')
+        site, created = Site.objects.update_or_create(
+            id=1, defaults={'domain': domain, 'name': 'Admiralty'},
+        )
+        log(f"  Site {'created' if created else 'updated'}: {site.domain}")
+    except Exception as e:
+        log(f"  WARNING: Could not configure Site: {e}")
+
+    log("=== Collecting static files ===")
+    run(f"{manage} collectstatic --noinput")
+
+    if os.environ.get('DEMO_MODE', '').lower() in ('true', '1', 'yes'):
+        log("=== Seeding demo users ===")
+        run(f"{manage} seed_demo_admiralty")
+
+    log(f"=== Starting gunicorn on port {port} ===")
+    os.execvp("gunicorn", [
+        "gunicorn", "admiralty_site.wsgi",
+        "--bind", f"0.0.0.0:{port}",
+        "--workers", "2",
+        "--access-logfile", "-",
+        "--error-logfile", "-",
+        "--timeout", "120",
+    ])
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        log(f"FATAL ERROR: {e}")
+        import traceback
+        traceback.print_exc(file=sys.stdout)
+        sys.exit(1)

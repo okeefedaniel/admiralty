@@ -166,7 +166,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="py-4 mt-auto" role="contentinfo">
+  <footer class="bg-dark text-light py-4 mt-auto" role="contentinfo">
     <div class="container">
       <div class="row">
         <div class="col-md-6">
@@ -192,9 +192,15 @@
         </div>
       </div>
       <hr class="my-3 border-secondary">
-      <p class="text-muted small mb-0 text-center">
-        &copy; {% now "Y" %} DockLabs. All rights reserved.
-      </p>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="text-muted small mb-0">
+          &copy; {% now "Y" %} DockLabs. All rights reserved.
+        </p>
+        <p class="small mb-0">
+          <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
+          <a href="#" class="text-muted text-decoration-none">Terms of Service</a>
+        </p>
+      </div>
     </div>
   </footer>
 
