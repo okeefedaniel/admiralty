@@ -56,15 +56,22 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.sites',
     # Keel shared platform
+    'keel.accounts',
     'keel.core',
     'keel.security',
     'keel.notifications',
-    'keel.comms',
     'keel.requests',
     # Third party
     'crispy_forms',
     'crispy_bootstrap5',
+    # Allauth (SSO / MFA)
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.microsoft',
+    'allauth.mfa',
     # Admiralty core (notifications, preferences)
     'core.apps.AdmiraltyConfig',
     # FOIA app
@@ -80,8 +87,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'keel.accounts.middleware.ProductAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'keel.core.middleware.AuditMiddleware',
 ]
 
@@ -116,8 +125,7 @@ DATABASES = {
     )
 }
 
-# Use Django's built-in User model (no core.User dependency)
-# AUTH_USER_MODEL defaults to 'auth.User'
+AUTH_USER_MODEL = 'keel_accounts.KeelUser'
 
 # Redirect migrations for foia app to standalone migration set
 MIGRATION_MODULES = {
@@ -162,9 +170,44 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # Login/Logout
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/foia/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/auth/login/'
+
+# ---------------------------------------------------------------------------
+# Allauth
+# ---------------------------------------------------------------------------
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+ACCOUNT_ADAPTER = 'keel.core.sso.KeelAccountAdapter'
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+_MSFT_TENANT = os.environ.get('MICROSOFT_TENANT_ID', 'common')
+SOCIALACCOUNT_PROVIDERS = {
+    'microsoft': {
+        'APP': {
+            'client_id': os.environ.get('MICROSOFT_CLIENT_ID', ''),
+            'secret': os.environ.get('MICROSOFT_CLIENT_SECRET', ''),
+        },
+        'SCOPE': ['openid', 'email', 'profile', 'User.Read'],
+        'AUTH_PARAMS': {'prompt': 'select_account'},
+        'TENANT': _MSFT_TENANT,
+    },
+}
+
+MFA_ADAPTER = 'allauth.mfa.adapter.DefaultMFAAdapter'
+MFA_SUPPORTED_TYPES = ['totp', 'webauthn', 'recovery_codes']
+MFA_TOTP_ISSUER = 'Admiralty'
+MFA_PASSKEY_LOGIN_ENABLED = True
 
 # Email — Resend HTTP API for transactional emails (Railway blocks outbound SMTP)
 if DEBUG:
@@ -245,7 +288,8 @@ KEEL_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 KEEL_LOGIN_MAX_FAILURES = 10
 KEEL_LOGIN_LOCKOUT_WINDOW = 900       # 15 minutes
 KEEL_LOGIN_LOCKOUT_DURATION = 1800    # 30 minutes
-KEEL_LOGIN_PATHS = ['/accounts/login/', '/admin/login/']
+KEEL_LOGIN_PATHS = ['/auth/login/', '/accounts/login/', '/admin/login/']
+KEEL_GATE_ACCESS = True
 KEEL_BUSINESS_HOURS = (8, 18)
 KEEL_AUDIT_LOG_MODEL = 'core.AuditLog'
 KEEL_PRODUCT_NAME = 'Admiralty'
@@ -255,10 +299,6 @@ KEEL_NOTIFICATION_MODEL = 'core.Notification'
 KEEL_NOTIFICATION_PREFERENCE_MODEL = 'core.NotificationPreference'
 KEEL_NOTIFICATION_LOG_MODEL = 'core.NotificationLog'
 
-# Communications (keel.comms)
-COMMS_MAIL_DOMAIN = os.environ.get('COMMS_MAIL_DOMAIN', 'mail.docklabs.ai')
-COMMS_POSTMARK_SERVER_TOKEN = os.environ.get('COMMS_POSTMARK_SERVER_TOKEN', '')
-COMMS_POSTMARK_WEBHOOK_TOKEN = os.environ.get('COMMS_POSTMARK_WEBHOOK_TOKEN', '')
 KEEL_CSP_POLICY = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'"
 KEEL_ALLOWED_UPLOAD_EXTENSIONS = [
     '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv',

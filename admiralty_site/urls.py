@@ -4,8 +4,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
+from allauth.account import views as allauth_views
 from keel.core.views import health_check
 from keel.core.demo import demo_login_view
 
@@ -25,15 +26,19 @@ urlpatterns = [
     path('demo/', TemplateView.as_view(template_name='admiralty/demo.html'), name='demo'),
     path('demo-login/', demo_login_view, name='demo_login'),
 
-    # Auth — simple Django auth views
-    path('accounts/login/', auth_views.LoginView.as_view(
+    # Auth
+    path('auth/login/', allauth_views.LoginView.as_view(
         template_name='admiralty/login.html',
     ), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(
-        template_name='admiralty/password_change.html',
-        success_url='/',
-    ), name='password_change'),
+    path('auth/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('accounts/', include('allauth.urls')),
+
+    # Convenience named URL for the "Sign in with Microsoft" button
+    path(
+        'auth/sso/microsoft/',
+        RedirectView.as_view(url='/accounts/microsoft/login/?process=login', query_string=False),
+        name='microsoft_login',
+    ),
 
     # Notifications (via Keel)
     path('notifications/', include('keel.notifications.urls')),
@@ -43,6 +48,7 @@ urlpatterns = [
 
     # Keel integrations
     path('keel/requests/', include('keel.requests.urls')),
+    path('keel/', include('keel.accounts.urls')),
     path('keel/', include('keel.core.foia_urls')),
 ]
 
