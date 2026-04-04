@@ -259,7 +259,7 @@ KEEL_NOTIFICATION_LOG_MODEL = 'core.NotificationLog'
 COMMS_MAIL_DOMAIN = os.environ.get('COMMS_MAIL_DOMAIN', 'mail.docklabs.ai')
 COMMS_POSTMARK_SERVER_TOKEN = os.environ.get('COMMS_POSTMARK_SERVER_TOKEN', '')
 COMMS_POSTMARK_WEBHOOK_TOKEN = os.environ.get('COMMS_POSTMARK_WEBHOOK_TOKEN', '')
-KEEL_CSP_POLICY = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'"
+KEEL_CSP_POLICY = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'"
 KEEL_ALLOWED_UPLOAD_EXTENSIONS = [
     '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv',
     '.txt', '.rtf', '.odt', '.ods', '.ppt', '.pptx',
