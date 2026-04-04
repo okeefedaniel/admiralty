@@ -7,4 +7,4 @@ python-dotenv>=1.0,<2.0
 whitenoise>=6.5,<7.0
 gunicorn>=21.2,<23.0
 anthropic>=0.40,<1.0
-keel @ git+https://github.com/okeefedaniel/keel.git@845651c
+keel @ git+https://github.com/okeefedaniel/keel.git@7b1b1e7
