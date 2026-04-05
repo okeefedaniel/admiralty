@@ -107,6 +107,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'keel.core.context_processors.site_context',
+                'keel.core.context_processors.fleet_context',
                 'foia.context_processors.foia_context',
             ],
         },
@@ -292,6 +293,14 @@ KEEL_LOGIN_PATHS = ['/auth/login/', '/accounts/login/', '/admin/login/']
 KEEL_GATE_ACCESS = True
 KEEL_BUSINESS_HOURS = (8, 18)
 KEEL_AUDIT_LOG_MODEL = 'core.AuditLog'
+KEEL_PRODUCT_CODE = 'admiralty'
+KEEL_FLEET_PRODUCTS = [
+    {'name': 'Helm', 'label': 'Helm', 'code': 'helm', 'url': '/'},
+    {'name': 'Beacon', 'label': 'Beacon', 'code': 'beacon', 'url': '/'},
+    {'name': 'Harbor', 'label': 'Harbor', 'code': 'harbor', 'url': '/'},
+    {'name': 'Bounty', 'label': 'Bounty', 'code': 'bounty', 'url': '/'},
+    {'name': 'Lookout', 'label': 'Lookout', 'code': 'lookout', 'url': '/'},
+]
 KEEL_PRODUCT_NAME = 'Admiralty'
 KEEL_PRODUCT_ICON = 'bi-shield-lock'
 KEEL_PRODUCT_SUBTITLE = 'FOIA Request Management'
