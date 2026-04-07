@@ -114,7 +114,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'admiralty.wsgi.application'
+WSGI_APPLICATION = 'admiralty_site.wsgi.application'
 
 # Database — separate from Beacon
 import dj_database_url
