@@ -7,7 +7,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView, RedirectView
 
 from allauth.account import views as allauth_views
-from keel.core.views import health_check, LandingView
+from keel.core.views import health_check, LandingView, SuiteLogoutView
 from keel.core.demo import demo_login_view
 from foia.views import FOIADashboardView
 
@@ -62,7 +62,7 @@ urlpatterns = [
     path('auth/login/', allauth_views.LoginView.as_view(
         template_name='account/login.html',
     ), name='login'),
-    path('auth/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('auth/logout/', SuiteLogoutView.as_view(), name='logout'),
     path('accounts/', include('allauth.urls')),
 
     # Convenience named URL for the "Sign in with Microsoft" button
