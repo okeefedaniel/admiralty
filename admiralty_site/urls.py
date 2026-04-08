@@ -9,6 +9,7 @@ from django.views.generic import TemplateView, RedirectView
 from allauth.account import views as allauth_views
 from keel.core.views import health_check, LandingView
 from keel.core.demo import demo_login_view
+from foia.views import FOIADashboardView
 
 admin.site.site_header = 'Admiralty Administration'
 admin.site.site_title = 'Admiralty Admin'
@@ -48,10 +49,10 @@ urlpatterns = [
         authenticated_redirect='foia:dashboard',
     ), name='home'),
 
-    # Canonical suite-wide post-login URL. Every DockLabs product exposes
-    # /dashboard/ so login redirects are identical across the suite. Here
-    # it aliases the real FOIA dashboard at /foia/dashboard/.
-    path('dashboard/', RedirectView.as_view(url='/foia/dashboard/', permanent=False), name='dashboard_alias'),
+    # Canonical suite-wide post-login URL. Mounts FOIADashboardView
+    # directly so the URL bar stays at /dashboard/. The legacy
+    # foia:dashboard URL still works at /foia/dashboard/.
+    path('dashboard/', FOIADashboardView.as_view(), name='dashboard_alias'),
 
     # Demo
     path('demo/', TemplateView.as_view(template_name='admiralty/demo.html'), name='demo'),
