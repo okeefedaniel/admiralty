@@ -173,9 +173,9 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # Login/Logout
-LOGIN_URL = '/auth/login/'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/auth/login/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # ---------------------------------------------------------------------------
 # Allauth

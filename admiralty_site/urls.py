@@ -2,11 +2,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import LoginView
 from django.urls import include, path
 from django.views.generic import TemplateView, RedirectView
 
-from allauth.account import views as allauth_views
+from keel.accounts.forms import LoginForm
 from keel.core.views import health_check, LandingView, SuiteLogoutView
 from keel.core.demo import demo_login_view
 from foia.views import FOIADashboardView
@@ -58,11 +58,14 @@ urlpatterns = [
     path('demo/', TemplateView.as_view(template_name='admiralty/demo.html'), name='demo'),
     path('demo-login/', demo_login_view, name='demo_login'),
 
-    # Auth
-    path('auth/login/', allauth_views.LoginView.as_view(
+    # Custom login/logout views using the shared keel LoginForm so the
+    # input fields render with Bootstrap styling. Mounted before the
+    # allauth include so they shadow allauth's bare LoginView.
+    path('accounts/login/', LoginView.as_view(
         template_name='account/login.html',
-    ), name='login'),
-    path('auth/logout/', SuiteLogoutView.as_view(), name='logout'),
+        authentication_form=LoginForm,
+    ), name='account_login'),
+    path('accounts/logout/', SuiteLogoutView.as_view(), name='account_logout'),
     path('accounts/', include('allauth.urls')),
 
     # Convenience named URL for the "Sign in with Microsoft" button
