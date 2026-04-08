@@ -21,36 +21,16 @@
 <!-- KPI Cards -->
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body py-3 text-center">
-        <h2 class="mb-0">{{ total }}</h2>
-        <small class="text-muted">Total Requests</small>
-      </div>
-    </div>
+    {% include "keel/components/stat_card.html" with value=total label="Total Requests" icon="bi-inbox" color="blue" %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="card border-0 shadow-sm h-100 border-start border-warning border-3">
-      <div class="card-body py-3 text-center">
-        <h2 class="mb-0 text-warning">{{ open }}</h2>
-        <small class="text-muted">Open</small>
-      </div>
-    </div>
+    {% include "keel/components/stat_card.html" with value=open label="Open" icon="bi-hourglass-split" color="gold" %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="card border-0 shadow-sm h-100 border-start border-danger border-3">
-      <div class="card-body py-3 text-center">
-        <h2 class="mb-0 text-danger">{{ overdue }}</h2>
-        <small class="text-muted">Past Deadline</small>
-      </div>
-    </div>
+    {% include "keel/components/stat_card.html" with value=overdue label="Past Deadline" icon="bi-exclamation-triangle" color="red" %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">
-      <div class="card-body py-3 text-center">
-        <h2 class="mb-0 text-primary">{{ pending_review }}</h2>
-        <small class="text-muted">Pending Attorney Review</small>
-      </div>
-    </div>
+    {% include "keel/components/stat_card.html" with value=pending_review label="Pending Attorney Review" icon="bi-shield-check" color="purple" %}
   </div>
 </div>
 
