@@ -45,7 +45,13 @@ urlpatterns = [
             {'title': 'Search', 'description': 'Cross-product search surfaces responsive records from every DockLabs system.'},
             {'title': 'Determine & Respond', 'description': 'Apply exemptions, package the response, and notify the requester.'},
         ],
+        authenticated_redirect='foia:dashboard',
     ), name='home'),
+
+    # Canonical suite-wide post-login URL. Every DockLabs product exposes
+    # /dashboard/ so login redirects are identical across the suite. Here
+    # it aliases the real FOIA dashboard at /foia/dashboard/.
+    path('dashboard/', RedirectView.as_view(url='/foia/dashboard/', permanent=False), name='dashboard_alias'),
 
     # Demo
     path('demo/', TemplateView.as_view(template_name='admiralty/demo.html'), name='demo'),

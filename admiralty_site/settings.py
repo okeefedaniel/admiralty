@@ -173,7 +173,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # Login/Logout
 LOGIN_URL = '/auth/login/'
-LOGIN_REDIRECT_URL = '/foia/dashboard/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/auth/login/'
 
 # ---------------------------------------------------------------------------
