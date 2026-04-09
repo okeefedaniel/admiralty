@@ -343,6 +343,7 @@ KEEL_PRODUCT_SUBTITLE = 'FOIA Request Management'
 KEEL_NOTIFICATION_MODEL = 'admiralty_core.Notification'
 KEEL_NOTIFICATION_PREFERENCE_MODEL = 'admiralty_core.NotificationPreference'
 KEEL_NOTIFICATION_LOG_MODEL = 'admiralty_core.NotificationLog'
+HELM_FEED_API_KEY = os.environ.get('HELM_FEED_API_KEY', '')
 
 KEEL_CSP_POLICY = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'"
 KEEL_ALLOWED_UPLOAD_EXTENSIONS = [

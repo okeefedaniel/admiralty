@@ -10,6 +10,7 @@ from keel.accounts.forms import LoginForm
 from keel.core.views import health_check, LandingView, SuiteLogoutView
 from keel.core.demo import demo_login_view
 from keel.core.search_views import search_view
+from foia.helm_feed import admiralty_helm_feed
 from foia.views import FOIADashboardView
 
 admin.site.site_header = 'Admiralty Administration'
@@ -78,6 +79,9 @@ urlpatterns = [
 
     # Notifications (via Keel)
     path('notifications/', include('keel.notifications.urls')),
+
+    # Helm executive dashboard feed
+    path('api/v1/helm-feed/', admiralty_helm_feed, name='helm-feed'),
 
     # FOIA app
     path('foia/', include('foia.urls')),
