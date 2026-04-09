@@ -9,6 +9,7 @@ from django.views.generic import TemplateView, RedirectView
 from keel.accounts.forms import LoginForm
 from keel.core.views import health_check, LandingView, SuiteLogoutView
 from keel.core.demo import demo_login_view
+from keel.core.search_views import search_view
 from foia.views import FOIADashboardView
 
 admin.site.site_header = 'Admiralty Administration'
@@ -82,6 +83,7 @@ urlpatterns = [
     path('foia/', include('foia.urls')),
 
     # Keel integrations
+    path('search/', search_view, name='search'),
     path('keel/requests/', include('keel.requests.urls')),
     path('keel/', include('keel.accounts.urls')),
     path('keel/', include('keel.core.foia_urls')),
