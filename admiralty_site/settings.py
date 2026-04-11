@@ -110,6 +110,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'keel.core.context_processors.site_context',
                 'keel.core.context_processors.fleet_context',
+                'keel.core.context_processors.breadcrumb_context',
                 'foia.context_processors.foia_context',
             ],
         },
