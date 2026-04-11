@@ -22,6 +22,9 @@ urlpatterns = [
     path('health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
 
+    # Support (shared keel page — linked from 500.html)
+    path('support/', TemplateView.as_view(template_name='keel/support.html'), name='support'),
+
     # Public landing page
     path('', LandingView.as_view(
         template_name='admiralty/home.html',
