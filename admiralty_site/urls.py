@@ -7,7 +7,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView, RedirectView
 
 from keel.accounts.forms import LoginForm
-from keel.core.views import health_check, LandingView, SuiteLogoutView
+from keel.core.views import health_check, favicon_view, robots_txt, LandingView, SuiteLogoutView
 from keel.core.demo import demo_login_view
 from keel.core.search_views import search_view
 from foia.helm_feed import admiralty_helm_feed
@@ -20,6 +20,8 @@ admin.site.index_title = 'FOIA Management'
 
 urlpatterns = [
     path('health/', health_check, name='health_check'),
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('favicon.ico', favicon_view, name='favicon'),
     path('admin/', admin.site.urls),
 
     # Support (shared keel page — linked from 500.html)
