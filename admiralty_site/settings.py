@@ -82,6 +82,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'keel.security.middleware.SecurityHeadersMiddleware',
+    'keel.security.middleware.AdminIPAllowlistMiddleware',
     'keel.security.middleware.FailedLoginMonitor',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -327,17 +328,7 @@ KEEL_GATE_ACCESS = True
 KEEL_BUSINESS_HOURS = (8, 18)
 KEEL_AUDIT_LOG_MODEL = 'core.AuditLog'
 KEEL_PRODUCT_CODE = 'admiralty'
-KEEL_FLEET_PRODUCTS = [
-    {'name': 'Helm', 'label': 'Helm', 'code': 'helm', 'url': 'https://helm.docklabs.ai/dashboard/'},
-    {'name': 'Harbor', 'label': 'Harbor', 'code': 'harbor', 'url': 'https://harbor.docklabs.ai/dashboard/'},
-    {'name': 'Beacon', 'label': 'Beacon', 'code': 'beacon', 'url': 'https://beacon.docklabs.ai/dashboard/'},
-    {'name': 'Lookout', 'label': 'Lookout', 'code': 'lookout', 'url': 'https://lookout.docklabs.ai/dashboard/'},
-    {'name': 'Bounty', 'label': 'Bounty', 'code': 'bounty', 'url': 'https://bounty.docklabs.ai/dashboard/'},
-    {'name': 'Admiralty', 'label': 'Admiralty', 'code': 'admiralty', 'url': 'https://admiralty.docklabs.ai/dashboard/'},
-    {'name': 'Purser', 'label': 'Purser', 'code': 'purser', 'url': 'https://purser.docklabs.ai/dashboard/'},
-    {'name': 'Manifest', 'label': 'Manifest', 'code': 'manifest', 'url': 'https://manifest.docklabs.ai/dashboard/'},
-    {'name': 'Yeoman', 'label': 'Yeoman', 'code': 'yeoman', 'url': 'https://yeoman.docklabs.ai/dashboard/'},
-]
+from keel.core.fleet import FLEET as KEEL_FLEET_PRODUCTS  # noqa: E402,F401
 KEEL_PRODUCT_NAME = 'Admiralty'
 KEEL_PRODUCT_ICON = 'bi-shield-lock'
 KEEL_PRODUCT_SUBTITLE = 'FOIA Request Management'
@@ -353,3 +344,14 @@ KEEL_ALLOWED_UPLOAD_EXTENSIONS = [
     '.png', '.jpg', '.jpeg', '.gif', '.tiff',
     '.zip', '.gz',
 ]
+
+# --- Admin allowlist + trusted-proxy config (keel.security) ---
+# KEEL_ADMIN_ALLOWED_IPS: list of CIDR / IPs allowed to hit /admin/.
+#   Empty list = no-op (dev). Set via env on every Railway service in prod.
+# KEEL_TRUSTED_PROXY_COUNT: number of trusted proxies between the client and
+#   Django. Railway = 1. If 0, X-Forwarded-For is ignored (client spoof-safe).
+KEEL_ADMIN_ALLOWED_IPS = [
+    ip.strip() for ip in os.environ.get('KEEL_ADMIN_ALLOWED_IPS', '').split(',')
+    if ip.strip()
+]
+KEEL_TRUSTED_PROXY_COUNT = int(os.environ.get('KEEL_TRUSTED_PROXY_COUNT', '1'))

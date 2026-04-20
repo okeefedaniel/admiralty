@@ -2,8 +2,11 @@
 import json
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models as db_models
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -20,12 +23,54 @@ from .models import (
     FOIAResponsePackage, FOIAAppeal, StatutoryExemption, FOIADocument,
 )
 
+try:
+    from keel.security.scanning import FileSecurityValidator
+except ImportError:  # pragma: no cover — keel is always installed in prod
+    FileSecurityValidator = None
+
+
+_FOIA_ROLES = ('foia_admin', 'foia_officer', 'foia_reviewer', 'system_admin')
+
+
+def _has_foia_role(user) -> bool:
+    """Gate upload / admin endpoints to FOIA-authorized staff only."""
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    if getattr(user, 'is_superuser', False):
+        return True
+    role = getattr(user, 'role', '') or ''
+    return role in _FOIA_ROLES
+
+
+class FOIARoleRequiredMixin(AccessMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not _has_foia_role(request.user):
+            raise PermissionDenied('FOIA role required.')
+        return super().dispatch(request, *args, **kwargs)
+
+
+def _validate_upload(uploaded_file: UploadedFile) -> None:
+    """Enforce FileSecurityValidator + KEEL_MAX_UPLOAD_SIZE on every upload.
+
+    FOIA uploads previously accepted any file (finding #102). This ensures
+    extension allowlist + magic-byte validation + optional ClamAV before
+    the file hits MEDIA_ROOT where an attorney might later fetch and
+    open it.
+    """
+    max_size = getattr(settings, 'KEEL_MAX_UPLOAD_SIZE', 20 * 1024 * 1024)
+    if uploaded_file.size > max_size:
+        raise PermissionDenied(
+            f'Upload exceeds {max_size} bytes.'
+        )
+    if FileSecurityValidator is not None:
+        FileSecurityValidator()(uploaded_file)
+
 
 # ---------------------------------------------------------------------------
 # Dashboard & List Views
 # ---------------------------------------------------------------------------
 
-class FOIADashboardView(LoginRequiredMixin, generic.TemplateView):
+class FOIADashboardView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.TemplateView):
     template_name = 'foia/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -66,7 +111,7 @@ class FOIADashboardView(LoginRequiredMixin, generic.TemplateView):
         return ctx
 
 
-class FOIARequestListView(LoginRequiredMixin, generic.ListView):
+class FOIARequestListView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.ListView):
     template_name = 'foia/request_list.html'
     context_object_name = 'requests'
     paginate_by = 25
@@ -89,7 +134,7 @@ class FOIARequestListView(LoginRequiredMixin, generic.ListView):
         return ctx
 
 
-class FOIAReviewQueueView(LoginRequiredMixin, generic.ListView):
+class FOIAReviewQueueView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.ListView):
     template_name = 'foia/review_queue.html'
     context_object_name = 'requests'
     paginate_by = 25
@@ -107,7 +152,7 @@ class FOIAReviewQueueView(LoginRequiredMixin, generic.ListView):
 # Request CRUD
 # ---------------------------------------------------------------------------
 
-class FOIARequestCreateView(LoginRequiredMixin, generic.CreateView):
+class FOIARequestCreateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.CreateView):
     model = FOIARequest
     form_class = FOIARequestForm
     template_name = 'foia/request_form.html'
@@ -122,7 +167,7 @@ class FOIARequestCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse('foia:request_detail', kwargs={'pk': self.object.pk})
 
 
-class FOIARequestDetailView(LoginRequiredMixin, generic.DetailView):
+class FOIARequestDetailView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.DetailView):
     model = FOIARequest
     template_name = 'foia/request_detail.html'
     context_object_name = 'foia'
@@ -177,7 +222,7 @@ class FOIARequestDetailView(LoginRequiredMixin, generic.DetailView):
         return ctx
 
 
-class FOIARequestUpdateView(LoginRequiredMixin, generic.UpdateView):
+class FOIARequestUpdateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.UpdateView):
     model = FOIARequest
     form_class = FOIARequestForm
     template_name = 'foia/request_form.html'
@@ -195,7 +240,7 @@ class FOIARequestUpdateView(LoginRequiredMixin, generic.UpdateView):
 # Status Transition
 # ---------------------------------------------------------------------------
 
-class FOIATransitionView(LoginRequiredMixin, View):
+class FOIATransitionView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Advance a FOIA request to a new status."""
 
     def post(self, request, pk):
@@ -224,7 +269,7 @@ class FOIATransitionView(LoginRequiredMixin, View):
 # Scope Definition
 # ---------------------------------------------------------------------------
 
-class FOIAScopeView(LoginRequiredMixin, View):
+class FOIAScopeView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Define or update search scope for a FOIA request."""
 
     def get(self, request, pk):
@@ -272,7 +317,7 @@ class FOIAScopeView(LoginRequiredMixin, View):
 # Search Execution
 # ---------------------------------------------------------------------------
 
-class FOIARunSearchView(LoginRequiredMixin, View):
+class FOIARunSearchView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Execute the FOIA search based on defined scope."""
 
     def post(self, request, pk):
@@ -300,7 +345,7 @@ class FOIARunSearchView(LoginRequiredMixin, View):
 # Search Results & Review
 # ---------------------------------------------------------------------------
 
-class FOIASearchResultsView(LoginRequiredMixin, generic.DetailView):
+class FOIASearchResultsView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.DetailView):
     """View all search results for a FOIA request."""
     model = FOIARequest
     template_name = 'foia/search_results.html'
@@ -348,7 +393,7 @@ class FOIASearchResultsView(LoginRequiredMixin, generic.DetailView):
         return ctx
 
 
-class FOIADeterminationView(LoginRequiredMixin, View):
+class FOIADeterminationView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Attorney makes a determination on a single search result."""
 
     def get(self, request, pk, result_pk):
@@ -402,7 +447,7 @@ class FOIADeterminationView(LoginRequiredMixin, View):
 # Response Package
 # ---------------------------------------------------------------------------
 
-class FOIACompileResponseView(LoginRequiredMixin, View):
+class FOIACompileResponseView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Compile search results into a response package."""
 
     def post(self, request, pk):
@@ -439,7 +484,7 @@ class FOIACompileResponseView(LoginRequiredMixin, View):
 # Appeals
 # ---------------------------------------------------------------------------
 
-class FOIAAIReviewView(LoginRequiredMixin, View):
+class FOIAAIReviewView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Run AI classification review on all search results."""
 
     def post(self, request, pk):
@@ -459,7 +504,7 @@ class FOIAAIReviewView(LoginRequiredMixin, View):
         return redirect('foia:search_results', pk=pk)
 
 
-class FOIAExemptionListView(LoginRequiredMixin, generic.ListView):
+class FOIAExemptionListView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.ListView):
     """View and manage statutory exemptions."""
     model = StatutoryExemption
     template_name = 'foia/exemption_list.html'
@@ -469,7 +514,7 @@ class FOIAExemptionListView(LoginRequiredMixin, generic.ListView):
         return StatutoryExemption.objects.filter(is_active=True).order_by('subdivision')
 
 
-class FOIAExemptionUpdateView(LoginRequiredMixin, generic.UpdateView):
+class FOIAExemptionUpdateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.UpdateView):
     """Update statutory exemption text and guidance."""
     model = StatutoryExemption
     template_name = 'foia/exemption_form.html'
@@ -496,7 +541,7 @@ class FOIAExemptionUpdateView(LoginRequiredMixin, generic.UpdateView):
         return response
 
 
-class FOIAAppealCreateView(LoginRequiredMixin, generic.CreateView):
+class FOIAAppealCreateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.CreateView):
     model = FOIAAppeal
     form_class = FOIAAppealForm
     template_name = 'foia/appeal_form.html'
@@ -526,7 +571,7 @@ class FOIAAppealCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse('foia:request_detail', kwargs={'pk': self.foia.pk})
 
 
-class FOIAAppealUpdateView(LoginRequiredMixin, generic.UpdateView):
+class FOIAAppealUpdateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.UpdateView):
     model = FOIAAppeal
     form_class = FOIAAppealForm
     template_name = 'foia/appeal_form.html'
@@ -549,7 +594,7 @@ class FOIAAppealUpdateView(LoginRequiredMixin, generic.UpdateView):
 # Document Management (searchable document repository)
 # ---------------------------------------------------------------------------
 
-class FOIADocumentListView(LoginRequiredMixin, generic.ListView):
+class FOIADocumentListView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.ListView):
     """List all uploaded FOIA documents."""
     model = FOIADocument
     template_name = 'foia/document_list.html'
@@ -573,7 +618,7 @@ class FOIADocumentListView(LoginRequiredMixin, generic.ListView):
         return ctx
 
 
-class FOIADocumentCreateView(LoginRequiredMixin, generic.CreateView):
+class FOIADocumentCreateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.CreateView):
     """Upload a new document for FOIA search."""
     model = FOIADocument
     template_name = 'foia/document_form.html'
@@ -595,6 +640,9 @@ class FOIADocumentCreateView(LoginRequiredMixin, generic.CreateView):
         return form
 
     def form_valid(self, form):
+        uploaded = form.cleaned_data.get('file')
+        if uploaded:
+            _validate_upload(uploaded)
         form.instance.uploaded_by = self.request.user
         response = super().form_valid(form)
         messages.success(self.request, f'Document "{self.object.title}" uploaded.')
@@ -604,7 +652,7 @@ class FOIADocumentCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse('foia:document_list')
 
 
-class FOIADocumentBulkUploadView(LoginRequiredMixin, generic.TemplateView):
+class FOIADocumentBulkUploadView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.TemplateView):
     """Upload multiple documents at once."""
     template_name = 'foia/document_bulk_upload.html'
 
@@ -616,6 +664,7 @@ class FOIADocumentBulkUploadView(LoginRequiredMixin, generic.TemplateView):
         source = request.POST.get('source', '').strip()
         count = 0
         for f in files:
+            _validate_upload(f)
             title = f.name.rsplit('.', 1)[0] if '.' in f.name else f.name
             FOIADocument.objects.create(
                 title=title,
@@ -628,14 +677,14 @@ class FOIADocumentBulkUploadView(LoginRequiredMixin, generic.TemplateView):
         return redirect('foia:document_list')
 
 
-class FOIADocumentDetailView(LoginRequiredMixin, generic.DetailView):
+class FOIADocumentDetailView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.DetailView):
     """View document details."""
     model = FOIADocument
     template_name = 'foia/document_detail.html'
     context_object_name = 'document'
 
 
-class FOIADocumentUpdateView(LoginRequiredMixin, generic.UpdateView):
+class FOIADocumentUpdateView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.UpdateView):
     """Edit document metadata."""
     model = FOIADocument
     template_name = 'foia/document_form.html'

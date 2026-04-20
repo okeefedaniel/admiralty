@@ -80,7 +80,10 @@ def main():
 
     if os.environ.get('DEMO_MODE', '').lower() in ('true', '1', 'yes'):
         log("=== Seeding demo users ===")
+        run(f"{manage} seed_keel_users")
         run(f"{manage} seed_demo_admiralty")
+        log("=== Seeding demo FOIA data ===")
+        run(f"{manage} seed_admiralty_demo")
 
     log(f"=== Starting gunicorn on port {port} ===")
     os.execvp("gunicorn", [
