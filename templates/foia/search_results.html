@@ -119,20 +119,20 @@
             </td>
             <td>
               {% if result.pre_classification == 'likely_responsive' %}
-              <span class="badge bg-success-subtle text-success">Likely Responsive</span>
+              <span class="foia"><span class="foia-dot"></span>Likely Responsive</span>
               {% elif result.pre_classification == 'likely_exempt' %}
-              <span class="badge bg-warning-subtle text-warning">Likely Exempt</span>
+              <span class="pill pill-brass">Likely Exempt</span>
               {% elif result.pre_classification == 'needs_review' %}
-              <span class="badge bg-primary-subtle text-primary">Needs Review</span>
+              <span class="pill pill-navy">Needs Review</span>
               {% elif result.pre_classification == 'not_relevant' %}
-              <span class="badge bg-secondary-subtle text-secondary">Not Relevant</span>
+              <span class="pill pill-muted">Not Relevant</span>
               {% endif %}
             </td>
             <td>
               {% with zone=result.snapshot_metadata.zone %}
-              {% if zone == 'shared' %}<span class="badge bg-success-subtle text-success">Zone 1</span>
-              {% elif zone == 'decd_internal' %}<span class="badge bg-primary-subtle text-primary">Zone 2</span>
-              {% else %}<span class="badge bg-secondary-subtle text-secondary">{{ zone }}</span>{% endif %}
+              {% if zone == 'shared' %}<span class="pill pill-success">Zone 1</span>
+              {% elif zone == 'decd_internal' %}<span class="pill pill-navy">Zone 2</span>
+              {% else %}<span class="pill pill-muted">{{ zone }}</span>{% endif %}
               {% endwith %}
             </td>
             <td>
@@ -208,13 +208,13 @@
                 <div class="zone-record-desc">{{ result.record_description|truncatewords:10 }}</div>
                 <div class="d-flex gap-1 flex-wrap mt-1">
                   {% if result.pre_classification == 'likely_responsive' %}
-                  <span class="badge bg-success-subtle text-success zone-record-badge">Responsive</span>
+                  <span class="foia"><span class="foia-dot"></span>Responsive</span>
                   {% elif result.pre_classification == 'likely_exempt' %}
-                  <span class="badge bg-warning-subtle text-warning zone-record-badge">Exempt</span>
+                  <span class="pill pill-brass">Exempt</span>
                   {% elif result.pre_classification == 'needs_review' %}
-                  <span class="badge bg-primary-subtle text-primary zone-record-badge">Review</span>
+                  <span class="pill pill-navy">Review</span>
                   {% elif result.pre_classification == 'not_relevant' %}
-                  <span class="badge bg-secondary-subtle text-secondary zone-record-badge">N/A</span>
+                  <span class="pill pill-muted">N/A</span>
                   {% endif %}
                   {% if result.has_determination %}
                   <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
@@ -263,13 +263,13 @@
                 <div class="zone-record-desc">{{ result.record_description|truncatewords:10 }}</div>
                 <div class="d-flex gap-1 flex-wrap mt-1">
                   {% if result.pre_classification == 'likely_responsive' %}
-                  <span class="badge bg-success-subtle text-success zone-record-badge">Responsive</span>
+                  <span class="foia"><span class="foia-dot"></span>Responsive</span>
                   {% elif result.pre_classification == 'likely_exempt' %}
-                  <span class="badge bg-warning-subtle text-warning zone-record-badge">Exempt</span>
+                  <span class="pill pill-brass">Exempt</span>
                   {% elif result.pre_classification == 'needs_review' %}
-                  <span class="badge bg-primary-subtle text-primary zone-record-badge">Review</span>
+                  <span class="pill pill-navy">Review</span>
                   {% elif result.pre_classification == 'not_relevant' %}
-                  <span class="badge bg-secondary-subtle text-secondary zone-record-badge">N/A</span>
+                  <span class="pill pill-muted">N/A</span>
                   {% endif %}
                   {% if result.has_determination %}
                   <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
