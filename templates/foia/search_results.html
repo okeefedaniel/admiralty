@@ -157,7 +157,7 @@
                 <i class="bi bi-eye me-1"></i>Review
               </span>
               {% elif result.ai_flag.flag == 'ok' %}
-              <span class="badge bg-secondary-subtle text-secondary"><i class="bi bi-check"></i></span>
+              <span class="pill pill-success"><i class="bi bi-check"></i></span>
               {% endif %}
               {% if result.ai_flag.ai_reasoning %}
               <br><small class="text-muted">{{ result.ai_flag.ai_reasoning|truncatewords:10 }}</small>

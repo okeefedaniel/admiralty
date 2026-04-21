@@ -27,11 +27,11 @@
             </h5>
             <div>
               {% if result.pre_classification == 'likely_responsive' %}
-              <span class="badge bg-success-subtle text-success">Likely Responsive</span>
+              <span class="foia"><span class="foia-dot"></span>Likely Responsive</span>
               {% elif result.pre_classification == 'likely_exempt' %}
-              <span class="badge bg-warning-subtle text-warning">Likely Exempt</span>
+              <span class="pill pill-brass">Likely Exempt</span>
               {% elif result.pre_classification == 'needs_review' %}
-              <span class="badge bg-primary-subtle text-primary">Needs Review</span>
+              <span class="pill pill-navy">Needs Review</span>
               {% endif %}
             </div>
           </div>
