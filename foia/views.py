@@ -86,6 +86,11 @@ class FOIADashboardView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.Templ
         ctx['my_assigned'] = qs.filter(
             assigned_to=self.request.user
         ).exclude(status__in=['responded', 'closed']).order_by('statutory_deadline')[:10]
+        list_url = reverse('foia:request_list')
+        ctx['total_url'] = list_url
+        ctx['open_url'] = f'{list_url}?open=1' if ctx['open'] else list_url
+        ctx['overdue_url'] = f'{list_url}?overdue=1' if ctx['overdue'] else list_url
+        ctx['pending_review_url'] = f'{list_url}?status=under_review' if ctx['pending_review'] else list_url
 
         # Zone distribution across all search results
         all_results = FOIASearchResult.objects.all()
@@ -124,6 +129,13 @@ class FOIARequestListView(FOIARoleRequiredMixin, LoginRequiredMixin, generic.Lis
         status = self.request.GET.get('status')
         if status:
             qs = qs.filter(status=status)
+        if self.request.GET.get('open') == '1':
+            qs = qs.exclude(status__in=['responded', 'closed'])
+        if self.request.GET.get('overdue') == '1':
+            now = timezone.now().date()
+            qs = qs.exclude(status__in=['responded', 'closed']).filter(statutory_deadline__lt=now)
+        if self.request.GET.get('mine') == '1':
+            qs = qs.filter(assigned_to=self.request.user)
         return qs
 
     def get_context_data(self, **kwargs):

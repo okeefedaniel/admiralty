@@ -21,16 +21,16 @@
 <!-- KPI Cards -->
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    {% include "keel/components/stat_card.html" with value=total label="Total Requests" icon="bi-inbox" color="blue" %}
+    {% include "keel/components/stat_card.html" with value=total label="Total Requests" icon="bi-inbox" color="blue" url=total_url %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    {% include "keel/components/stat_card.html" with value=open label="Open" icon="bi-hourglass-split" color="gold" %}
+    {% include "keel/components/stat_card.html" with value=open label="Open" icon="bi-hourglass-split" color="gold" url=open_url %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    {% include "keel/components/stat_card.html" with value=overdue label="Past Deadline" icon="bi-exclamation-triangle" color="red" %}
+    {% include "keel/components/stat_card.html" with value=overdue label="Past Deadline" icon="bi-exclamation-triangle" color="red" url=overdue_url %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    {% include "keel/components/stat_card.html" with value=pending_review label="Pending Attorney Review" icon="bi-shield-check" color="purple" %}
+    {% include "keel/components/stat_card.html" with value=pending_review label="Pending Attorney Review" icon="bi-shield-check" color="purple" url=pending_review_url %}
   </div>
 </div>
 
