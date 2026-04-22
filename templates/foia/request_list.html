@@ -48,10 +48,10 @@
         <tr>
           <td><a href="{% url 'foia:request_detail' req.pk %}" class="fw-semibold text-decoration-none">{{ req.request_number }}</a></td>
           <td>{{ req.subject|truncatewords:8 }}</td>
-          <td><span class="badge badge-{{ req.status }}">{{ req.get_status_display }}</span></td>
+          <td><span class="pill pill-{{ req.status }}">{{ req.get_status_display }}</span></td>
           <td>
-            {% if req.priority == 'urgent' %}<span class="badge bg-danger">Urgent</span>
-            {% elif req.priority == 'high' %}<span class="badge bg-warning text-dark">High</span>
+            {% if req.priority == 'urgent' %}<span class="pill pill-error">Urgent</span>
+            {% elif req.priority == 'high' %}<span class="pill pill-brass">High</span>
             {% else %}<span class="text-muted">{{ req.get_priority_display }}</span>{% endif %}
           </td>
           <td class="text-muted">{{ req.date_received|date:"M d, Y" }}</td>

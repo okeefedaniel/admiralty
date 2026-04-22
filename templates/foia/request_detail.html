@@ -7,9 +7,9 @@
   <div>
     <h1 class="h3 mb-1">{{ foia.request_number }}</h1>
     <p class="text-muted mb-0">
-      <span class="badge badge-{{ foia.status }}">{{ foia.get_status_display }}</span>
-      {% if foia.priority == 'urgent' %}<span class="badge bg-danger ms-1">Urgent</span>
-      {% elif foia.priority == 'high' %}<span class="badge bg-warning text-dark ms-1">High</span>{% endif %}
+      <span class="pill pill-{{ foia.status }}">{{ foia.get_status_display }}</span>
+      {% if foia.priority == 'urgent' %}<span class="pill pill-error ms-1">Urgent</span>
+      {% elif foia.priority == 'high' %}<span class="pill pill-brass ms-1">High</span>{% endif %}
       <span class="ms-2">Received {{ foia.date_received|date:"M d, Y" }}</span>
     </p>
   </div>
@@ -101,7 +101,7 @@
     <!-- Search Results Summary -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Search Results <span class="badge bg-secondary ms-1">{{ results_count }}</span></h5>
+        <h5 class="mb-0">Search Results <span class="pill pill-muted ms-1">{{ results_count }}</span></h5>
         <a href="{% url 'foia:search_results' foia.pk %}" class="btn btn-sm btn-outline-primary">
           <i class="bi bi-eye me-1"></i>Review All
         </a>
@@ -182,7 +182,7 @@
           <div class="d-flex justify-content-between">
             <div>
               <strong>{{ appeal.appeal_number|default:"Appeal" }}</strong>
-              <span class="badge badge-{{ appeal.appeal_status }} ms-2">{{ appeal.get_appeal_status_display }}</span>
+              <span class="pill pill-{{ appeal.appeal_status }} ms-2">{{ appeal.get_appeal_status_display }}</span>
             </div>
             <div>
               <small class="text-muted">Filed {{ appeal.filed_date|date:"M d, Y" }}</small>

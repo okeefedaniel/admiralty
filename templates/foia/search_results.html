@@ -137,23 +137,23 @@
             </td>
             <td>
               {% if result.has_determination %}
-              <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>Done</span>
+              <span class="pill pill-success"><i class="bi bi-check-lg me-1"></i>Done</span>
               {% else %}
-              <span class="badge bg-warning text-dark">Pending</span>
+              <span class="pill pill-brass">Pending</span>
               {% endif %}
             </td>
             {% if ai_review_ran %}
             <td>
               {% if result.ai_flag.flag == 'should_release' %}
-              <span class="badge bg-success" title="{{ result.ai_flag.flag_reason|default:'' }}">
+              <span class="pill pill-success" title="{{ result.ai_flag.flag_reason|default:'' }}">
                 <i class="bi bi-arrow-up me-1"></i>Release?
               </span>
               {% elif result.ai_flag.flag == 'should_withhold' %}
-              <span class="badge bg-danger" title="{{ result.ai_flag.flag_reason|default:'' }}">
+              <span class="pill pill-error" title="{{ result.ai_flag.flag_reason|default:'' }}">
                 <i class="bi bi-shield-exclamation me-1"></i>Withhold?
               </span>
               {% elif result.ai_flag.flag == 'review_recommended' %}
-              <span class="badge bg-warning text-dark" title="{{ result.ai_flag.flag_reason|default:'' }}">
+              <span class="pill pill-brass" title="{{ result.ai_flag.flag_reason|default:'' }}">
                 <i class="bi bi-eye me-1"></i>Review
               </span>
               {% elif result.ai_flag.flag == 'ok' %}
@@ -188,7 +188,7 @@
             <h6 class="mb-0 text-white">
               <i class="bi bi-globe me-2"></i>Zone 1 — Shared
             </h6>
-            <span class="badge bg-white text-dark">{{ zone_shared_count }}</span>
+            <span class="pill bg-white">{{ zone_shared_count }}</span>
           </div>
         </div>
         <div class="card-body p-2">
@@ -217,9 +217,9 @@
                   <span class="pill pill-muted">N/A</span>
                   {% endif %}
                   {% if result.has_determination %}
-                  <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
+                  <span class="pill pill-success zone-record-pill"><i class="bi bi-check-lg"></i> Done</span>
                   {% else %}
-                  <span class="badge bg-warning text-dark zone-record-badge">Pending</span>
+                  <span class="pill pill-brass zone-record-pill">Pending</span>
                   {% endif %}
                 </div>
               </div>
@@ -243,7 +243,7 @@
             <h6 class="mb-0 text-white">
               <i class="bi bi-building me-2"></i>Zone 2 — Agency Internal
             </h6>
-            <span class="badge bg-white text-dark">{{ zone_decd_count }}</span>
+            <span class="pill bg-white">{{ zone_decd_count }}</span>
           </div>
         </div>
         <div class="card-body p-2">
@@ -272,9 +272,9 @@
                   <span class="pill pill-muted">N/A</span>
                   {% endif %}
                   {% if result.has_determination %}
-                  <span class="badge bg-success zone-record-badge"><i class="bi bi-check-lg"></i> Done</span>
+                  <span class="pill pill-success zone-record-pill"><i class="bi bi-check-lg"></i> Done</span>
                   {% else %}
-                  <span class="badge bg-warning text-dark zone-record-badge">Pending</span>
+                  <span class="pill pill-brass zone-record-pill">Pending</span>
                   {% endif %}
                 </div>
               </div>

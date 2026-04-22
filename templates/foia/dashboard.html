@@ -101,7 +101,7 @@
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <strong>{{ req.request_number }}</strong>
-              <span class="badge badge-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
+              <span class="pill pill-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
               <br><small class="text-muted">{{ req.subject|truncatewords:8 }}</small>
             </div>
             <div class="text-end">
@@ -135,7 +135,7 @@
           <div class="d-flex justify-content-between">
             <div>
               <strong>{{ req.request_number }}</strong> — {{ req.subject|truncatewords:8 }}
-              <span class="badge badge-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
+              <span class="pill pill-{{ req.status }} ms-2">{{ req.get_status_display }}</span>
             </div>
             <small class="text-muted">{{ req.date_received|date:"M d" }}</small>
           </div>
