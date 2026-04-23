@@ -8,4 +8,4 @@ whitenoise>=6.5,<7.0
 gunicorn>=22.0,<24.0
 anthropic>=0.40,<1.0
 django-allauth[mfa,socialaccount]>=65.0,<66.0
-keel @ git+https://github.com/okeefedaniel/keel.git@ee53751c6bebdb4c430c34e0cafb2e0538cfa225
+keel @ git+https://github.com/okeefedaniel/keel.git@baacedaf376cb841a9a0eaaa1a23647f75ab4d0e
