@@ -17,10 +17,13 @@ else:
 
     class WorkflowEngine(_BaseWorkflowEngine):
         @staticmethod
-        def _user_has_role(user, required_roles):
+        def _user_has_role(user, required_roles, obj=None):
+            # ``obj`` accepted for compatibility with keel >=0.16.0
+            # (see keel/core/workflow.py — base passes the bound instance
+            # through so subclasses can resolve object-scoped roles).
+            # Standalone-mode override ignores it: is_staff grants all roles.
             if not required_roles or 'any' in required_roles:
                 return True
-            # In standalone mode, is_staff grants all FOIA roles
             if getattr(user, 'is_staff', False):
                 return True
             return False
