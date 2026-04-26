@@ -123,7 +123,7 @@ def get_dashboard_url():
     """Return the URL name for the main dashboard."""
     if is_beacon():
         return 'dashboard'
-    return 'foia:dashboard'
+    return 'dashboard_alias'
 
 
 def get_brand():
