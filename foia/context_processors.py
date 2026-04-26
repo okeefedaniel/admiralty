@@ -16,7 +16,4 @@ def foia_context(request):
         'DEMO_MODE': getattr(django_settings, 'DEMO_MODE', False),
     }
 
-    if not is_beacon():
-        ctx['SITE_NAME'] = 'Admiralty'
-
     return ctx
