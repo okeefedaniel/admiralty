@@ -11,6 +11,7 @@ from keel.core.views import health_check, favicon_view, robots_txt, LandingView,
 from keel.core.demo import demo_login_view
 from keel.core.search_views import search_view
 from foia.helm_feed import admiralty_helm_feed
+from foia.helm_inbox import admiralty_helm_feed_inbox
 from foia.views import FOIADashboardView
 
 admin.site.site_header = 'Admiralty Administration'
@@ -53,7 +54,7 @@ urlpatterns = [
             {'title': 'Search', 'description': 'Cross-product search surfaces responsive records from every DockLabs system.'},
             {'title': 'Determine & Respond', 'description': 'Apply exemptions, package the response, and notify the requester.'},
         ],
-        authenticated_redirect='foia:dashboard',
+        authenticated_redirect='dashboard_alias',
     ), name='home'),
 
     # Canonical suite-wide post-login URL. Mounts FOIADashboardView
@@ -87,6 +88,7 @@ urlpatterns = [
 
     # Helm executive dashboard feed
     path('api/v1/helm-feed/', admiralty_helm_feed, name='helm-feed'),
+    path('api/v1/helm-feed/inbox/', admiralty_helm_feed_inbox, name='helm-feed-inbox'),
 
     # FOIA app
     path('foia/', include('foia.urls')),
