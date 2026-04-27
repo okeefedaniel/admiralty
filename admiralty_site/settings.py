@@ -28,7 +28,6 @@ ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 # Demo mode
 DEMO_MODE = os.environ.get('DEMO_MODE', 'False').lower() in ('true', '1', 'yes')
 DEMO_ROLES = ['system_admin', 'foia_manager', 'foia_officer', 'foia_attorney', 'admin']
-DEMO_PASSWORD = os.environ.get('DEMO_PASSWORD', 'demo' + '2026!')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 

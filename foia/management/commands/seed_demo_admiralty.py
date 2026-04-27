@@ -1,12 +1,14 @@
-"""Create demo user accounts for Admiralty (standalone FOIA)."""
-import os
+"""Create demo user accounts for Admiralty (standalone FOIA).
 
+Demo users are seeded with `set_unusable_password()` and can only sign in
+through `keel.core.demo.demo_login_view` (the one-click role buttons at
+`/demo-login/`). See keel CLAUDE.md → "Demo authentication — passwordless
+contract" for the full rationale.
+"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-
-DEMO_PASSWORD = os.environ.get('DEMO_PASSWORD', 'demo2026!')
 
 DEMO_USERS = [
     # (username, email, first, last, is_staff, is_superuser)
@@ -37,24 +39,25 @@ class Command(BaseCommand):
         for username, email, first, last, is_staff, is_superuser in DEMO_USERS:
             if User.objects.filter(username=username).exists():
                 user = User.objects.get(username=username)
-                user.set_password(DEMO_PASSWORD)
+                user.set_unusable_password()
                 user.save()
-                self.stdout.write(f'  User {username}: exists (password reset)')
+                self.stdout.write(f'  User {username}: exists (password cleared)')
                 continue
 
-            User.objects.create_user(
+            user = User.objects.create_user(
                 username=username,
                 email=email,
-                password=DEMO_PASSWORD,
                 first_name=first,
                 last_name=last,
                 is_staff=is_staff,
                 is_superuser=is_superuser,
             )
+            user.set_unusable_password()
+            user.save()
             self.stdout.write(self.style.SUCCESS(f'  User {username}: created'))
 
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('Demo accounts ready. Password for all: [set via DEMO_PASSWORD env var]'))
+        self.stdout.write(self.style.SUCCESS('Demo accounts ready. Sign in via /demo-login/ (one-click role buttons).'))
         self.stdout.write('')
         self.stdout.write('Accounts:')
         for username, _, first, last, _, _ in DEMO_USERS:
