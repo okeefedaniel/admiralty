@@ -1,0 +1,376 @@
+{% extends "admiralty/base.html" %}
+
+{% block page_title %}Help & FAQ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold mb-1">Help &amp; Frequently Asked Questions</h1>
+                <p class="text-muted mb-0">Quick answers about using Admiralty. For the full reference, see the <a href="{% url 'manual' %}">User Manual</a>.</p>
+            </div>
+            <a href="{% url 'manual' %}" class="btn btn-outline-primary btn-sm" title="Open the full user manual">
+                <i class="bi bi-book me-1"></i> User Manual
+            </a>
+        </div>
+
+        <div class="accordion" id="faqAccordion">
+
+            <!-- Q1: What is Admiralty -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading1">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse1"
+                            aria-expanded="false" aria-controls="faqCollapse1">
+                        <i class="bi bi-shield-shaded me-2 text-primary"></i>
+                        What is Admiralty?
+                    </button>
+                </h2>
+                <div id="faqCollapse1" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading1" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Admiralty is the FOIA workflow management system in the DockLabs suite. It moves a Freedom of Information Act request through nine well-defined statuses — from intake to scope definition, search, attorney review, response packaging, and (when needed) appeal — with statutory deadline tracking, exemption claims, and a full immutable audit trail at every step.</p>
+                        <p class="mb-0">In standalone mode, Admiralty searches its own document repository. When deployed alongside Beacon CRM, it also reaches into Beacon's interaction and note corpus for cross-product responsive-record discovery.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2: Workflow -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading2">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse2"
+                            aria-expanded="false" aria-controls="faqCollapse2">
+                        <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                        What's the FOIA request workflow?
+                    </button>
+                </h2>
+                <div id="faqCollapse2" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading2" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Nine statuses, in order:</p>
+                        <ol class="mb-0">
+                            <li><strong>Received</strong> — intake complete.</li>
+                            <li><strong>Scope Defined</strong> — search parameters set.</li>
+                            <li><strong>Searching</strong> — finding responsive records.</li>
+                            <li><strong>Under Review</strong> — attorney determining responsiveness and exemptions.</li>
+                            <li><strong>Package Ready</strong> — compiled package awaiting senior review.</li>
+                            <li><strong>Senior Review</strong> — final approval pass.</li>
+                            <li><strong>Responded</strong> — response sent to requester.</li>
+                            <li><strong>Appealed</strong> (optional) — requester has filed an appeal.</li>
+                            <li><strong>Closed</strong> — terminal.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3: Statutory deadline -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading3">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse3"
+                            aria-expanded="false" aria-controls="faqCollapse3">
+                        <i class="bi bi-stopwatch me-2 text-primary"></i>
+                        How does the statutory deadline work?
+                    </button>
+                </h2>
+                <div id="faqCollapse3" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading3" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Connecticut FOIA (<strong>CGS §1-206</strong>) gives an agency <strong>4 business days from receipt</strong> to acknowledge a request. Federal FOIA (<strong>5 USC 552</strong>) gives <strong>20 business days</strong>. Admiralty stores three deadline-relevant fields:</p>
+                        <ul class="mb-0">
+                            <li><code>date_received</code> — when the agency got the request. Triggers the clock.</li>
+                            <li><code>statutory_deadline</code> — computed deadline. Indexed; powers the dashboard <strong>Overdue</strong> count and the Awaiting Me column in Helm.</li>
+                            <li><code>extended_deadline</code> — set when an extension has been negotiated with the requester.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4: Scope -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading4">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse4"
+                            aria-expanded="false" aria-controls="faqCollapse4">
+                        <i class="bi bi-bullseye me-2 text-primary"></i>
+                        How do I define a search scope?
+                    </button>
+                </h2>
+                <div id="faqCollapse4" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading4" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>From a request detail page, click <strong>Define Scope</strong>. A scope carries:</p>
+                        <ul>
+                            <li><strong>Date range</strong> — start and end of the search window.</li>
+                            <li><strong>Keywords</strong> — one term per line.</li>
+                            <li><strong>Company names</strong> / <strong>Contact names</strong> — one per line (Beacon mode).</li>
+                            <li><strong>Record types</strong> — which kinds of records to include (notes, interactions, documents).</li>
+                            <li><strong>Scope notes</strong> — free-text description of the search strategy.</li>
+                        </ul>
+                        <p class="mb-0">Saving a scope on a <code>received</code> request automatically advances it to <code>scope_defined</code>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5: Search -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading5">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse5"
+                            aria-expanded="false" aria-controls="faqCollapse5">
+                        <i class="bi bi-search me-2 text-primary"></i>
+                        Where does Admiralty search for responsive records?
+                    </button>
+                </h2>
+                <div id="faqCollapse5" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading5" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>It depends on deployment mode:</p>
+                        <ul>
+                            <li><strong>Standalone Admiralty</strong> — searches the <code>FOIADocument</code> repository (uploaded files with extracted text content).</li>
+                            <li><strong>Beacon-embedded</strong> — also reaches into Beacon's <code>Interaction</code> and <code>Note</code> rows in Zone 1 (shared public records) and Zone 2 (DECD internal). Zone 3 (<code>act_private</code>) is never returned — those records are not FOIA-responsive by policy.</li>
+                        </ul>
+                        <p class="mb-0">Each match becomes a <code>FOIASearchResult</code> with a content snapshot frozen at search time so it doesn't drift if the source is later edited.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6: Pre-classification -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading6">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse6"
+                            aria-expanded="false" aria-controls="faqCollapse6">
+                        <i class="bi bi-tags me-2 text-primary"></i>
+                        What do the search-result classifications mean?
+                    </button>
+                </h2>
+                <div id="faqCollapse6" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading6" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4"><span class="badge bg-success">Likely Responsive</span></dt>
+                            <dd class="col-sm-8">Matches the scope and appears releasable.</dd>
+                            <dt class="col-sm-4"><span class="badge bg-warning text-dark">Likely Exempt</span></dt>
+                            <dd class="col-sm-8">Matches but contains content covered by a statutory exemption.</dd>
+                            <dt class="col-sm-4"><span class="badge bg-secondary">Needs Review</span></dt>
+                            <dd class="col-sm-8">Match found; classification deferred to an attorney.</dd>
+                            <dt class="col-sm-4"><span class="badge bg-light text-dark border">Not Relevant</span></dt>
+                            <dd class="col-sm-8">False positive — included in the audit trail for completeness.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7: Determinations -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading7">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse7"
+                            aria-expanded="false" aria-controls="faqCollapse7">
+                        <i class="bi bi-gavel me-2 text-primary"></i>
+                        How does an attorney record a determination?
+                    </button>
+                </h2>
+                <div id="faqCollapse7" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading7" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>From the search results page, click into a result and write a determination. Fields:</p>
+                        <ul>
+                            <li><strong>Decision</strong> — Release / Withhold / Partial Release / Refer to Another Agency.</li>
+                            <li><strong>Exemptions claimed</strong> — multi-select from the active <code>StatutoryExemption</code> table; required for Withhold or Partial Release.</li>
+                            <li><strong>Justification</strong> — legal reasoning for the audit trail and privilege log.</li>
+                            <li><strong>Redacted content</strong> — sanitized version of the record (Partial Release).</li>
+                            <li><strong>Attorney notes</strong> — optional internal notes.</li>
+                        </ul>
+                        <p class="mb-0">Saving stamps the reviewing attorney and the timestamp. The request stays in <strong>Under Review</strong> until every result has a determination and the package has been compiled.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q8: AI review -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading8">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse8"
+                            aria-expanded="false" aria-controls="faqCollapse8">
+                        <i class="bi bi-stars me-2 text-primary"></i>
+                        How does the AI-assisted review work?
+                    </button>
+                </h2>
+                <div id="faqCollapse8" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading8" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Click <strong>AI Review</strong> on the search results page. Admiralty asks Claude to read every result and flag classification mismatches:</p>
+                        <ul>
+                            <li><code>should_release</code> — currently marked Withhold, AI thinks it's responsive and not exempt.</li>
+                            <li><code>should_withhold</code> — currently marked Release, AI sees likely-exempt content.</li>
+                            <li><code>review_recommended</code> — AI is high-confidence but the human classification is still <code>needs_review</code>.</li>
+                            <li><code>ok</code> — AI agrees with the current classification.</li>
+                        </ul>
+                        <p class="mb-0">AI review is advisory. Every determination still requires an attorney's sign-off. The feature is silent when <code>ANTHROPIC_API_KEY</code> isn't configured.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q9: Response package -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading9">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse9"
+                            aria-expanded="false" aria-controls="faqCollapse9">
+                        <i class="bi bi-file-earmark-zip me-2 text-primary"></i>
+                        How do I compile and send the response package?
+                    </button>
+                </h2>
+                <div id="faqCollapse9" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading9" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>From a request in <strong>Under Review</strong>, click <strong>Compile Response</strong>. Admiralty rolls up every determination into a <code>FOIAResponsePackage</code> with counts (released / withheld / partially released) and slots for the cover letter, response file, and privilege log.</p>
+                        <p class="mb-0">Compiling advances the request to <strong>Package Ready</strong>. From there a manager submits to <strong>Senior Review</strong>, and the senior reviewer either sends the response (→ <strong>Responded</strong>) or returns it to review with a comment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10: Appeals -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading10">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse10"
+                            aria-expanded="false" aria-controls="faqCollapse10">
+                        <i class="bi bi-megaphone me-2 text-primary"></i>
+                        How do I record an appeal?
+                    </button>
+                </h2>
+                <div id="faqCollapse10" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading10" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>From a <strong>Responded</strong> request, click <strong>Record Appeal</strong>. The appeal carries:</p>
+                        <ul class="mb-0">
+                            <li>Appeal number, filed date, status (Filed / Hearing Scheduled / etc.).</li>
+                            <li>Appellant arguments, agency response, hearing date and notes.</li>
+                            <li>Decision date, decision summary, and an uploaded decision document.</li>
+                            <li>Lessons learned for future requests.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q11: Documents -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading11">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse11"
+                            aria-expanded="false" aria-controls="faqCollapse11">
+                        <i class="bi bi-folder me-2 text-primary"></i>
+                        How do I upload documents to the FOIA repository?
+                    </button>
+                </h2>
+                <div id="faqCollapse11" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading11" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Visit <strong>Documents</strong> in the sidebar. Upload one file at a time at <code>/foia/documents/upload/</code>, or drag-and-drop multiple at <code>/foia/documents/bulk-upload/</code>.</p>
+                        <p class="mb-0">Every upload runs through <code>FileSecurityValidator</code> (extension allowlist, magic-byte check, optional ClamAV) and is capped at <code>KEEL_MAX_UPLOAD_SIZE</code> (default 10 MB). Documents become searchable as soon as their content is extracted.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q12: Helm integration -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading12">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse12"
+                            aria-expanded="false" aria-controls="faqCollapse12">
+                        <i class="bi bi-grid me-2 text-primary"></i>
+                        How does Admiralty surface in Helm?
+                    </button>
+                </h2>
+                <div id="faqCollapse12" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading12" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Admiralty publishes two endpoints to Helm:</p>
+                        <ul class="mb-0">
+                            <li><code>/api/v1/helm-feed/</code> — aggregate counts for the fleet metric grid.</li>
+                            <li><code>/api/v1/helm-feed/inbox/?user_sub=&lt;oidc_sub&gt;</code> — per-user inbox. Returns FOIA requests assigned to that user where the status is open, carrying the statutory deadline as the due date so Helm's Awaiting Me column can sort by urgency.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q13: Notifications -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading13">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse13"
+                            aria-expanded="false" aria-controls="faqCollapse13">
+                        <i class="bi bi-bell me-2 text-primary"></i>
+                        How do I control which notifications I receive?
+                    </button>
+                </h2>
+                <div id="faqCollapse13" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading13" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <p>Visit <a href="/notifications/preferences/">/notifications/preferences/</a> (also reachable from the sidebar user-menu dropdown).</p>
+                        <p class="mb-0">For each event type, toggle the in-app and email channels independently. Email delivery uses Resend in production.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q14: Support -->
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                <h2 class="accordion-header" id="faqHeading14">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faqCollapse14"
+                            aria-expanded="false" aria-controls="faqCollapse14">
+                        <i class="bi bi-headset me-2 text-primary"></i>
+                        How do I get help?
+                    </button>
+                </h2>
+                <div id="faqCollapse14" class="accordion-collapse collapse"
+                     aria-labelledby="faqHeading14" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body lh-lg">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold"><i class="bi bi-envelope me-2"></i>Email Support</h6>
+                                        <p class="small mb-0">
+                                            <a href="mailto:info@docklabs.ai">info@docklabs.ai</a><br>
+                                            Response within 1–2 business days.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold"><i class="bi bi-chat-dots me-2"></i>Feedback Widget</h6>
+                                        <p class="small mb-0">Look in the bottom-right corner of every page. Routes to the shared support queue.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0">For questions specific to a peer product (Helm, Harbor, Beacon, etc.), open the help link inside that product.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-question-circle display-6 text-primary d-block mb-3"></i>
+                <h5 class="fw-bold">Still have questions?</h5>
+                <p class="text-muted mb-3">If you couldn't find the answer you were looking for, please don't hesitate to contact us.</p>
+                <a href="mailto:info@docklabs.ai" class="btn btn-primary">
+                    <i class="bi bi-envelope me-2"></i> Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

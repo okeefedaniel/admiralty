@@ -1,0 +1,671 @@
+{% extends "admiralty/base.html" %}
+
+{% block page_title %}User Manual{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .manual-nav {
+        position: sticky;
+        top: 80px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+    .manual-nav .nav-link {
+        color: var(--text-secondary, #4a5568);
+        padding: 0.35rem 0.75rem;
+        font-size: 0.875rem;
+        border-left: 3px solid transparent;
+        border-radius: 0;
+    }
+    .manual-nav .nav-link:hover,
+    .manual-nav .nav-link.active {
+        color: var(--ct-blue, #1565c0);
+        border-left-color: var(--ct-blue, #1565c0);
+        background-color: rgba(21, 101, 192, 0.06);
+    }
+    .manual-section {
+        scroll-margin-top: 90px;
+    }
+    .manual-section h2 {
+        border-bottom: 2px solid #cfd8dc;
+        padding-bottom: 0.5rem;
+    }
+    .manual-section h3 {
+        color: #1565c0;
+    }
+    .role-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    .role-officer   { background-color: #e3f2fd; color: #1565c0; }
+    .role-attorney  { background-color: #ede7f6; color: #4527a0; }
+    .role-manager   { background-color: #fff3e0; color: #e65100; }
+    .role-senior    { background-color: #263238; color: #ffffff; }
+    .role-system    { background-color: #b71c1c; color: #ffffff; }
+    .workflow-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.75rem 0;
+    }
+    .workflow-step .step-num {
+        flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: #1565c0;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+    .status-flow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .status-flow .badge {
+        font-size: 0.8125rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+<div class="row">
+    <!-- Sidebar nav (desktop) -->
+    <div class="col-lg-3 d-none d-lg-block">
+        <nav class="manual-nav" aria-label="Manual sections">
+            <h6 class="fw-bold text-uppercase text-muted small mb-3 px-2">Contents</h6>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" href="#overview"><i class="bi bi-house me-2"></i>Overview</a></li>
+                <li class="nav-item"><a class="nav-link" href="#roles"><i class="bi bi-shield-lock me-2"></i>Roles</a></li>
+                <li class="nav-item"><a class="nav-link" href="#getting-started"><i class="bi bi-rocket-takeoff me-2"></i>Getting Started</a></li>
+                <li class="nav-item"><a class="nav-link" href="#dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#lifecycle"><i class="bi bi-diagram-3 me-2"></i>Request Lifecycle</a></li>
+                <li class="nav-item"><a class="nav-link" href="#intake"><i class="bi bi-inbox me-2"></i>Intake</a></li>
+                <li class="nav-item"><a class="nav-link" href="#scope"><i class="bi bi-bullseye me-2"></i>Scope</a></li>
+                <li class="nav-item"><a class="nav-link" href="#search"><i class="bi bi-search me-2"></i>Search</a></li>
+                <li class="nav-item"><a class="nav-link" href="#review"><i class="bi bi-gavel me-2"></i>Review</a></li>
+                <li class="nav-item"><a class="nav-link" href="#ai"><i class="bi bi-stars me-2"></i>AI Review</a></li>
+                <li class="nav-item"><a class="nav-link" href="#response"><i class="bi bi-file-earmark-zip me-2"></i>Response Package</a></li>
+                <li class="nav-item"><a class="nav-link" href="#appeals"><i class="bi bi-megaphone me-2"></i>Appeals</a></li>
+                <li class="nav-item"><a class="nav-link" href="#exemptions"><i class="bi bi-book me-2"></i>Exemptions</a></li>
+                <li class="nav-item"><a class="nav-link" href="#documents"><i class="bi bi-folder me-2"></i>Documents</a></li>
+                <li class="nav-item"><a class="nav-link" href="#deadline"><i class="bi bi-stopwatch me-2"></i>Statutory Deadline</a></li>
+                <li class="nav-item"><a class="nav-link" href="#integrations"><i class="bi bi-grid me-2"></i>Suite Integrations</a></li>
+                <li class="nav-item"><a class="nav-link" href="#notifications"><i class="bi bi-bell me-2"></i>Notifications</a></li>
+                <li class="nav-item"><a class="nav-link" href="#statuses"><i class="bi bi-tags me-2"></i>Status Reference</a></li>
+                <li class="nav-item"><a class="nav-link" href="#shortcuts"><i class="bi bi-keyboard me-2"></i>Keyboard Shortcuts</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-lg-9">
+
+        <!-- Mobile TOC -->
+        <div class="d-lg-none mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <button class="btn btn-outline-primary btn-sm w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileToc">
+                        <i class="bi bi-list me-2"></i>Table of Contents
+                    </button>
+                    <div class="collapse mt-3" id="mobileToc">
+                        <div class="list-group list-group-flush">
+                            <a href="#overview" class="list-group-item list-group-item-action small">Overview</a>
+                            <a href="#roles" class="list-group-item list-group-item-action small">Roles</a>
+                            <a href="#getting-started" class="list-group-item list-group-item-action small">Getting Started</a>
+                            <a href="#dashboard" class="list-group-item list-group-item-action small">Dashboard</a>
+                            <a href="#lifecycle" class="list-group-item list-group-item-action small">Request Lifecycle</a>
+                            <a href="#intake" class="list-group-item list-group-item-action small">Intake</a>
+                            <a href="#scope" class="list-group-item list-group-item-action small">Scope</a>
+                            <a href="#search" class="list-group-item list-group-item-action small">Search</a>
+                            <a href="#review" class="list-group-item list-group-item-action small">Review</a>
+                            <a href="#ai" class="list-group-item list-group-item-action small">AI Review</a>
+                            <a href="#response" class="list-group-item list-group-item-action small">Response Package</a>
+                            <a href="#appeals" class="list-group-item list-group-item-action small">Appeals</a>
+                            <a href="#exemptions" class="list-group-item list-group-item-action small">Exemptions</a>
+                            <a href="#documents" class="list-group-item list-group-item-action small">Documents</a>
+                            <a href="#deadline" class="list-group-item list-group-item-action small">Statutory Deadline</a>
+                            <a href="#integrations" class="list-group-item list-group-item-action small">Suite Integrations</a>
+                            <a href="#notifications" class="list-group-item list-group-item-action small">Notifications</a>
+                            <a href="#statuses" class="list-group-item list-group-item-action small">Status Reference</a>
+                            <a href="#shortcuts" class="list-group-item list-group-item-action small">Keyboard Shortcuts</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold mb-1">Admiralty User Manual</h1>
+                <p class="text-muted mb-0">Comprehensive guide to the FOIA workflow management system in the DockLabs suite.</p>
+            </div>
+            <a href="{% url 'help' %}" class="btn btn-outline-primary btn-sm" title="Open the FAQ">
+                <i class="bi bi-question-circle me-1"></i> FAQ
+            </a>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- OVERVIEW -->
+        <!-- ============================================================== -->
+        <section id="overview" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-house me-2 text-primary"></i>Overview</h2>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 lh-lg">
+                    <p>Admiralty implements the Connecticut Freedom of Information Act (CGS §1-200 et seq.) workflow as a structured, audit-ready pipeline. Each request moves through nine well-defined statuses from <strong>Received</strong> to <strong>Closed</strong>, and every transition is logged.</p>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-inbox text-primary fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Request intake</strong>
+                                    <p class="small text-muted mb-0">Single intake form routes requests with auto-classification and statutory deadline tracking.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-search text-primary fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Cross-product search</strong>
+                                    <p class="small text-muted mb-0">Surface responsive records from every DockLabs product from one screen.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-shield-check text-primary fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Exemption review</strong>
+                                    <p class="small text-muted mb-0">CGS §1-210 exemptions with citation tracking, AI-assisted pre-review, and full audit trails.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-stopwatch text-primary fs-5 mt-1"></i>
+                                <div>
+                                    <strong>Statutory clock</strong>
+                                    <p class="small text-muted mb-0">4-business-day Connecticut acknowledgement and 20-business-day federal windows tracked per request.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info border-0 small mt-3 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Admiralty is dual-mode. Standalone, the document repository is the primary search target. When deployed alongside Beacon, the same FOIA app gains cross-product search across Beacon's interactions and notes.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- ROLES -->
+        <!-- ============================================================== -->
+        <section id="roles" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-shield-lock me-2 text-primary"></i>Roles</h2>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <p>Admiralty's role gates use Django's <code>is_staff</code> flag in standalone mode, and Beacon's richer FOIA role taxonomy when deployed inside Beacon.</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr><th>Role</th><th>Capability</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="role-pill role-officer">FOIA Officer</span></td>
+                                    <td>Intake new requests, define scope, run search, pre-classify results, compile response packages.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="role-pill role-attorney">FOIA Attorney</span></td>
+                                    <td>Apply statutory exemptions, write redactions, sign off on legal determinations.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="role-pill role-manager">FOIA Manager</span></td>
+                                    <td>Everything Officer + Attorney can do, plus return packages for additional search and submit to senior review.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="role-pill role-senior">Senior Reviewer</span></td>
+                                    <td>Final approval of the response package before it goes out. May return to review with comments.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="role-pill role-system">System Admin</span></td>
+                                    <td>Full access.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">In standalone mode, any user with <code>is_staff=True</code> can hold any of these roles. In Beacon mode, the role gates are enforced by the <code>foia_officer</code> / <code>foia_attorney</code> / <code>foia_manager</code> / <code>agency_admin</code> / <code>system_admin</code> roles on the user record.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- GETTING STARTED -->
+        <!-- ============================================================== -->
+        <section id="getting-started" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-rocket-takeoff me-2 text-primary"></i>Getting Started</h2>
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4 lh-lg">
+                    <h5 class="fw-bold"><i class="bi bi-box-arrow-in-right me-2 text-primary"></i>Signing in</h5>
+                    <div class="workflow-step">
+                        <span class="step-num">1</span>
+                        <span>From any DockLabs product, click <strong>Admiralty</strong> in the fleet switcher, or visit <code>https://admiralty.docklabs.ai/</code>.</span>
+                    </div>
+                    <div class="workflow-step">
+                        <span class="step-num">2</span>
+                        <span>Click <strong>Sign in with DockLabs</strong> (the suite OIDC button) or <strong>Sign in with Microsoft</strong> (direct Entra) when configured.</span>
+                    </div>
+                    <div class="workflow-step">
+                        <span class="step-num">3</span>
+                        <span>You'll land on <code>/dashboard/</code>.</span>
+                    </div>
+                    <div class="alert alert-info border-0 small mt-3 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        If you're already signed in to another DockLabs product, the redirect is seamless — no second login form.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- DASHBOARD -->
+        <!-- ============================================================== -->
+        <section id="dashboard" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h2>
+            <p><code>/dashboard/</code> is the canonical post-login URL. It surfaces:</p>
+            <ul>
+                <li><strong>Total</strong> — every FOIA request in the system.</li>
+                <li><strong>Open</strong> — anything not yet <strong>Responded</strong> or <strong>Closed</strong>.</li>
+                <li><strong>Overdue</strong> — open requests past their statutory deadline.</li>
+                <li><strong>Pending Review</strong> — requests in <strong>Under Review</strong> awaiting attorney action.</li>
+                <li><strong>My Assigned</strong> — open requests assigned to you, ordered by statutory deadline.</li>
+                <li><strong>Recent intake</strong> — the ten most recently received requests.</li>
+                <li><strong>Zone distribution</strong> (Beacon-embedded mode) — share of search results from public-facing records vs DECD internal vs ACT private.</li>
+            </ul>
+            <p class="small text-muted">Each summary card links through to the underlying list with the right filter applied — clicking <strong>Overdue</strong> lands on <code>/foia/?overdue=1</code>, clicking <strong>Open</strong> on <code>/foia/?open=1</code>, and so on.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- LIFECYCLE -->
+        <!-- ============================================================== -->
+        <section id="lifecycle" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-diagram-3 me-2 text-primary"></i>Request Lifecycle</h2>
+            <p>Admiralty's nine statuses encode the FOIA pipeline:</p>
+            <div class="card bg-light border-0 mb-3">
+                <div class="card-body small">
+<pre class="mb-0">received → scope_defined → searching → under_review → package_ready →
+senior_review → responded → (appealed →) closed</pre>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr><th>From</th><th>To</th><th>Action</th><th>Required role</th><th>Notes</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>received</td><td>scope_defined</td><td>Define Scope</td><td>FOIA staff / manager</td><td>—</td></tr>
+                                <tr><td>scope_defined</td><td>searching</td><td>Begin Search</td><td>FOIA staff / manager</td><td>—</td></tr>
+                                <tr><td>searching</td><td>under_review</td><td>Submit for Review</td><td>FOIA staff / manager</td><td>—</td></tr>
+                                <tr><td>under_review</td><td>searching</td><td>Return to Search</td><td>FOIA manager</td><td>comment required</td></tr>
+                                <tr><td>under_review</td><td>package_ready</td><td>Approve Package</td><td>FOIA attorney / manager</td><td>—</td></tr>
+                                <tr><td>package_ready</td><td>senior_review</td><td>Submit to Senior Review</td><td>FOIA manager</td><td>—</td></tr>
+                                <tr><td>senior_review</td><td>under_review</td><td>Return to Review</td><td>FOIA manager / agency admin / system admin</td><td>comment required</td></tr>
+                                <tr><td>senior_review</td><td>responded</td><td>Send Response</td><td>FOIA manager / agency admin / system admin</td><td>—</td></tr>
+                                <tr><td>responded</td><td>appealed</td><td>Record Appeal</td><td>FOIA staff / manager</td><td>—</td></tr>
+                                <tr><td>responded</td><td>closed</td><td>Close Request</td><td>FOIA staff / manager</td><td>—</td></tr>
+                                <tr><td>appealed</td><td>closed</td><td>Close After Appeal</td><td>FOIA manager</td><td>—</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <p class="small text-muted mt-3">Every transition writes a <code>FOIARequestStatusHistory</code> row capturing the actor, the from / to status, the timestamp, and any required comment.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- INTAKE -->
+        <!-- ============================================================== -->
+        <section id="intake" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-inbox me-2 text-primary"></i>Intake</h2>
+            <p><code>/foia/create/</code> — start a new FOIA request. Required fields:</p>
+            <ul>
+                <li><strong>Request number</strong> — agency-assigned identifier (e.g. <code>FOIA-2026-001</code>). Must be unique.</li>
+                <li><strong>Status</strong> — defaults to <strong>Received</strong>.</li>
+                <li><strong>Priority</strong> — Low / Normal / High / Urgent.</li>
+                <li><strong>Requester name</strong> + at least one of email / phone.</li>
+                <li><strong>Subject</strong> and <strong>description</strong> — what records the requester is asking for.</li>
+                <li><strong>Date received</strong> — drives the statutory clock.</li>
+                <li><strong>Statutory deadline</strong> — auto-suggested as 4 business days from receipt per CT CGS §1-206(a). Editable for federal (5 USC 552 — 20 business days) or other regimes.</li>
+                <li><strong>Assigned to</strong> — the FOIA officer driving the request.</li>
+                <li><strong>Reviewing attorney</strong> — set later, before the request hits <strong>Under Review</strong>.</li>
+            </ul>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SCOPE -->
+        <!-- ============================================================== -->
+        <section id="scope" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-bullseye me-2 text-primary"></i>Scope Definition</h2>
+            <p><code>/foia/&lt;id&gt;/scope/</code> — define what to search for. A scope carries:</p>
+            <ul>
+                <li><strong>Date range</strong> — start and end of the search window.</li>
+                <li><strong>Keywords</strong> — one term or phrase per line. Case-insensitive <code>icontains</code> across record content.</li>
+                <li><strong>Company names</strong> — one per line (Beacon mode only).</li>
+                <li><strong>Contact names</strong> — one per line.</li>
+                <li><strong>Record types</strong> — which kinds of records to include (notes, interactions, documents).</li>
+                <li><strong>Scope notes</strong> — free-text description of the search strategy for the audit trail.</li>
+            </ul>
+            <p class="small text-muted">Saving a scope on a <code>received</code> request automatically advances it to <code>scope_defined</code>.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SEARCH -->
+        <!-- ============================================================== -->
+        <section id="search" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-search me-2 text-primary"></i>Search</h2>
+            <p><code>/foia/&lt;id&gt;/search/</code> (POST) — run the search against the configured scope. Results land at <code>/foia/&lt;id&gt;/results/</code>.</p>
+            <p>The search engine differs by deployment mode:</p>
+            <ul>
+                <li><strong>Standalone Admiralty</strong> — searches <code>FOIADocument</code> rows by extracted text content.</li>
+                <li><strong>Beacon-embedded</strong> — searches Beacon <code>Interaction</code> and <code>Note</code> rows in Zone 1 (shared public records) and Zone 2 (DECD internal). Zone 3 (<code>act_private</code>) is never returned. Plus <code>FOIADocument</code> rows.</li>
+            </ul>
+            <p>Each match becomes a <code>FOIASearchResult</code> capturing the record reference, a description, a snapshot of content frozen at search time, JSON metadata (including the source <code>zone</code>), and a pre-classification (Likely Responsive / Likely Exempt / Needs Review / Not Relevant).</p>
+            <p class="small text-muted">A successful search advances the request to <strong>Searching</strong>.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- REVIEW -->
+        <!-- ============================================================== -->
+        <section id="review" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-gavel me-2 text-primary"></i>Review &amp; Determinations</h2>
+            <p><code>/foia/&lt;id&gt;/results/</code> — the review queue. Per result you see the snapshot content, pre-classification, any AI flags, and whether a determination has been recorded.</p>
+            <p>Click into a result and write a determination:</p>
+            <ul>
+                <li><strong>Decision</strong> — Release / Withhold / Partial Release / Refer to Another Agency.</li>
+                <li><strong>Exemptions claimed</strong> — multi-select; required for Withhold or Partial Release.</li>
+                <li><strong>Justification</strong> — legal reasoning that lands in the audit trail and privilege log.</li>
+                <li><strong>Redacted content</strong> — sanitized version (Partial Release).</li>
+                <li><strong>Attorney notes</strong> — optional internal notes.</li>
+            </ul>
+            <p class="small text-muted">Saving a determination stamps the reviewing attorney and the timestamp. The request stays in <strong>Under Review</strong> until every result has a determination and the package has been compiled.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- AI -->
+        <!-- ============================================================== -->
+        <section id="ai" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-stars me-2 text-primary"></i>AI-Assisted Review</h2>
+            <p><code>/foia/&lt;id&gt;/results/ai-review/</code> — staff-only AI sweep. When <code>ANTHROPIC_API_KEY</code> is configured, Admiralty asks Claude to read every search result and flag classification mismatches:</p>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr><th>Flag</th><th>Meaning</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>should_release</code></td><td>Currently marked Withhold / Likely Exempt; AI thinks it's responsive and not exempt.</td></tr>
+                                <tr><td><code>should_withhold</code></td><td>Currently marked for Release; AI sees likely-exempt content.</td></tr>
+                                <tr><td><code>review_recommended</code></td><td>AI is high-confidence but the human classification is still <code>needs_review</code>.</td></tr>
+                                <tr><td><code>ok</code></td><td>AI agrees with the current classification.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <p class="small text-muted mt-3 mb-0">Each flag carries the AI recommendation, confidence (high / medium / low), and reasoning. Flags are stored in the session keyed by request ID and surface inline on the search results page. AI review is advisory — every determination still requires an attorney's sign-off.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- RESPONSE -->
+        <!-- ============================================================== -->
+        <section id="response" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-file-earmark-zip me-2 text-primary"></i>Response Package</h2>
+            <p><code>/foia/&lt;id&gt;/compile/</code> (POST) — compiles every determination into a <code>FOIAResponsePackage</code> row carrying:</p>
+            <ul>
+                <li><strong>Counts</strong> — total records found, released, withheld, partially released.</li>
+                <li><strong>Generated files</strong> — cover letter, response file, privilege log.</li>
+                <li><strong>Compliance flags</strong> — <code>is_complete</code>, <code>is_reviewed_by_attorney</code>, <code>is_approved_by_senior</code>.</li>
+            </ul>
+            <p>Compiling on a request in <strong>Under Review</strong> advances it to <strong>Package Ready</strong>. From there a manager submits to <strong>Senior Review</strong>, and the senior reviewer either sends the response (→ <strong>Responded</strong>) or returns it to review with a comment.</p>
+            <p class="small text-muted mb-0">When the response goes out, set the <strong>Date responded</strong> field on the request — this stops the statutory clock for compliance reporting.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- APPEALS -->
+        <!-- ============================================================== -->
+        <section id="appeals" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-megaphone me-2 text-primary"></i>Appeals</h2>
+            <p><code>/foia/&lt;id&gt;/appeal/</code> — record an appeal filed against the agency's response. An appeal carries:</p>
+            <ul>
+                <li><strong>Appeal number</strong> + <strong>filed date</strong>.</li>
+                <li><strong>Appeal status</strong> — Filed / Hearing Scheduled / Hearing Completed / Decision Pending / Upheld / Overturned / Settled / Withdrawn.</li>
+                <li><strong>Appellant arguments</strong> + <strong>agency response</strong>.</li>
+                <li><strong>Hearing date</strong> and <strong>hearing notes</strong>.</li>
+                <li><strong>Decision date</strong>, <strong>decision summary</strong>, and an uploaded <strong>decision document</strong>.</li>
+                <li><strong>Lessons learned</strong> — internal notes for future requests.</li>
+            </ul>
+            <p class="small text-muted mb-0">Recording an appeal on a <strong>Responded</strong> request advances it to <strong>Appealed</strong>. The request stays appealed until <strong>Close After Appeal</strong> moves it to <strong>Closed</strong>.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- EXEMPTIONS -->
+        <!-- ============================================================== -->
+        <section id="exemptions" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-book me-2 text-primary"></i>Statutory Exemptions</h2>
+            <p><code>/foia/exemptions/</code> — the reference table of Connecticut FOIA exemptions. Each <code>StatutoryExemption</code> carries:</p>
+            <ul>
+                <li><strong>Subdivision</strong> — e.g. <code>1-210(b)(5)(A)</code>.</li>
+                <li><strong>Label</strong> — short human-readable name.</li>
+                <li><strong>Statutory text</strong> — verbatim citation.</li>
+                <li><strong>Citation</strong> — formal cite for the privilege log.</li>
+                <li><strong>Guidance notes</strong> — internal interpretation guidance for FOIA staff.</li>
+                <li><strong>Active flag</strong> — toggle to retire an exemption without deleting historical determinations that cited it.</li>
+            </ul>
+            <p class="small text-muted mb-0">Exemption records are immutable from the determination perspective — historical determinations always preserve which exemption was claimed even if the row is later deactivated.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- DOCUMENTS -->
+        <!-- ============================================================== -->
+        <section id="documents" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-folder me-2 text-primary"></i>Document Repository</h2>
+            <p><code>/foia/documents/</code> — uploaded files searchable by full text. In standalone Admiralty this is the primary corpus; in Beacon mode it supplements the Interaction / Note search.</p>
+            <p>Each <code>FOIADocument</code> carries title + description, extracted <strong>content</strong>, the uploaded <strong>file</strong>, a <strong>document date</strong> (distinct from upload date), a <strong>source</strong> (department, system, custodian), and JSON <strong>tags</strong> for categorization.</p>
+            <p>Bulk-upload at <code>/foia/documents/bulk-upload/</code>.</p>
+            <div class="alert alert-warning border-0 small mb-0">
+                <i class="bi bi-shield-check me-2"></i>
+                Every upload runs through <code>FileSecurityValidator</code> (extension allowlist + magic-byte check + optional ClamAV) and is capped at <code>KEEL_MAX_UPLOAD_SIZE</code> (default 10 MB).
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- DEADLINE -->
+        <!-- ============================================================== -->
+        <section id="deadline" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-stopwatch me-2 text-primary"></i>Statutory Deadline</h2>
+            <p>Connecticut FOIA (<strong>CGS §1-206</strong>) gives an agency <strong>4 business days from receipt</strong> to acknowledge a request. Federal FOIA (<strong>5 USC 552</strong>) gives <strong>20 business days</strong>.</p>
+            <p>Admiralty stores three deadline-relevant fields:</p>
+            <ul>
+                <li><code>date_received</code> — when the agency got the request. Triggers the clock.</li>
+                <li><code>statutory_deadline</code> — computed deadline. Indexed; powers the dashboard <strong>Overdue</strong> count and the Awaiting Me column in Helm.</li>
+                <li><code>extended_deadline</code> — set when an extension has been negotiated with the requester.</li>
+            </ul>
+            <p class="small text-muted mb-0">The dashboard's <strong>Overdue</strong> count compares <code>statutory_deadline &lt; today</code> against open requests (anything not <strong>Responded</strong> or <strong>Closed</strong>).</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- INTEGRATIONS -->
+        <!-- ============================================================== -->
+        <section id="integrations" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-grid me-2 text-primary"></i>Suite Integrations</h2>
+
+            <h3 class="fw-bold mt-2">Helm executive dashboard</h3>
+            <p>Admiralty publishes two endpoints for Helm:</p>
+            <ul>
+                <li><code>/api/v1/helm-feed/</code> — aggregate counts for the fleet metric grid. Auth: <code>Authorization: Bearer $HELM_FEED_API_KEY</code>.</li>
+                <li><code>/api/v1/helm-feed/inbox/?user_sub=&lt;oidc_sub&gt;</code> — per-user inbox. Returns FOIA requests assigned to that user where the status is in <code>{received, scope_defined, searching, under_review, package_ready}</code>, carrying the <code>statutory_deadline</code> as the due date so Helm's Awaiting Me column can sort by urgency.</li>
+            </ul>
+            <p class="small text-muted">Both endpoints are no-ops when <code>HELM_FEED_API_KEY</code> is unset, so standalone deployments don't need to configure them.</p>
+
+            <h3 class="fw-bold mt-4">Beacon CRM</h3>
+            <p>When deployed inside Beacon, Admiralty's search engine reaches into Beacon's <code>Interaction</code> and <code>Note</code> corpus directly through the shared ORM. Zone 3 (<code>act_private</code>) records are never returned. The same <code>StatutoryExemption</code> and <code>FOIARequest</code> rows persist regardless of deployment mode.</p>
+
+            <h3 class="fw-bold mt-4">Cross-product FOIA export</h3>
+            <p class="mb-0">Other DockLabs products register records with <code>keel.foia.export</code> so their content is FOIA-discoverable. Admiralty consumes those exports into the search corpus when configured, and the agency's response package can cite records originating in Beacon, Harbor, Manifest, and others.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- NOTIFICATIONS -->
+        <!-- ============================================================== -->
+        <section id="notifications" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-bell me-2 text-primary"></i>Notifications</h2>
+            <p><a href="/notifications/">/notifications/</a> — the in-app notification list, with preferences at <a href="/notifications/preferences/">/notifications/preferences/</a>.</p>
+            <p class="mb-0 small text-muted">Channels (in-app + email) are user-configurable per event type. Email delivery uses Resend in production; the console backend in development.</p>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- STATUS REFERENCE -->
+        <!-- ============================================================== -->
+        <section id="statuses" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-tags me-2 text-primary"></i>Status Reference</h2>
+
+            <h3 class="fw-bold mt-2">FOIA request status</h3>
+            <div class="status-flow my-2">
+                <span class="badge bg-secondary">Received</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-info text-dark">Scope Defined</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-primary">Searching</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-warning text-dark">Under Review</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-success">Package Ready</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-success">Senior Review</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-success">Responded</span>
+                <span class="text-muted mx-2">→</span>
+                <span class="badge bg-secondary">Appealed</span>
+                <i class="bi bi-arrow-right"></i>
+                <span class="badge bg-dark">Closed</span>
+            </div>
+
+            <h3 class="fw-bold mt-4">Determination decision</h3>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Decision</th><th>Meaning</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="badge bg-success">Release</span></td><td>Record released in full.</td></tr>
+                                <tr><td><span class="badge bg-danger">Withhold</span></td><td>Record withheld in full. Requires at least one cited exemption.</td></tr>
+                                <tr><td><span class="badge bg-warning text-dark">Partial Release</span></td><td>Record released with redactions. Requires cited exemption + redacted content.</td></tr>
+                                <tr><td><span class="badge bg-info text-dark">Refer</span></td><td>Forwarded to another agency that holds the responsive record.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="fw-bold mt-4">Pre-classification</h3>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Class</th><th>Meaning</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="badge bg-success">Likely Responsive</span></td><td>Matches scope and appears releasable.</td></tr>
+                                <tr><td><span class="badge bg-warning text-dark">Likely Exempt</span></td><td>Matches but contains content covered by a statutory exemption.</td></tr>
+                                <tr><td><span class="badge bg-secondary">Needs Review</span></td><td>Match found; classification deferred to attorney.</td></tr>
+                                <tr><td><span class="badge bg-light text-dark border">Not Relevant</span></td><td>False positive — included for audit completeness.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="fw-bold mt-4">Appeal status</h3>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+                            <tbody>
+                                <tr><td>Filed</td><td>Appeal received.</td></tr>
+                                <tr><td>Hearing Scheduled</td><td>Hearing date set.</td></tr>
+                                <tr><td>Hearing Completed</td><td>Hearing held; awaiting decision.</td></tr>
+                                <tr><td>Decision Pending</td><td>Decision being drafted.</td></tr>
+                                <tr><td>Upheld</td><td>Agency decision stands.</td></tr>
+                                <tr><td>Overturned</td><td>Agency must release additional records.</td></tr>
+                                <tr><td>Settled</td><td>Resolved by negotiation.</td></tr>
+                                <tr><td>Withdrawn</td><td>Appellant withdrew the appeal.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="fw-bold mt-4">FOIA jurisdiction</h3>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Jurisdiction</th><th>Statute</th><th>Initial window</th></tr></thead>
+                            <tbody>
+                                <tr><td>Connecticut</td><td>CGS §1-206</td><td>4 business days to acknowledge</td></tr>
+                                <tr><td>Federal</td><td>5 USC 552</td><td>20 business days</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- KEYBOARD SHORTCUTS -->
+        <!-- ============================================================== -->
+        <section id="shortcuts" class="manual-section mb-5">
+            <h2 class="fw-bold mb-3"><i class="bi bi-keyboard me-2 text-primary"></i>Keyboard Shortcuts</h2>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <kbd>⌘K</kbd> <span class="text-muted">/</span> <kbd>Ctrl+K</kbd>
+                        <span>Open the suite-wide search modal.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer / next steps -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body text-center p-4">
+                <h5 class="fw-bold mb-2">Need a quick answer?</h5>
+                <p class="text-muted mb-3">The FAQ covers the most common questions in 14 short cards.</p>
+                <a href="{% url 'help' %}" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-question-circle me-1"></i> Help &amp; FAQ
+                </a>
+                <a href="mailto:info@docklabs.ai" class="btn btn-primary">
+                    <i class="bi bi-envelope me-1"></i> Contact Support
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock %}

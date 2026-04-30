@@ -16,6 +16,9 @@
 {% block sidebar_brand_name %}Admiralty{% endblock %}
 {% block sidebar_brand_href %}{% if user.is_authenticated %}{% url 'dashboard_alias' %}{% else %}/{% endif %}{% endblock %}
 
+{# Topbar help icon links to the FAQ page. #}
+{% block help_url %}{% url 'help' %}{% endblock %}
+
 {% block sidebar_favorites %}
 <div class="sb-section">
   <div class="sb-section-label">Favorites</div>
@@ -73,6 +76,9 @@
 
 {# === Sidebar user menu === #}
 {% block sidebar_user_menu %}
+<li><a class="dropdown-item" href="{% url 'help' %}"><i class="bi bi-question-circle me-2"></i>Help &amp; FAQ</a></li>
+<li><a class="dropdown-item" href="{% url 'manual' %}"><i class="bi bi-book me-2"></i>User Manual</a></li>
+<li><hr class="dropdown-divider"></li>
 {% if user.is_staff %}
 <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Admin</a></li>
 <li><hr class="dropdown-divider"></li>

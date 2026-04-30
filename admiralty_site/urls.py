@@ -28,6 +28,10 @@ urlpatterns = [
     # Support (shared keel page — linked from 500.html)
     path('support/', TemplateView.as_view(template_name='keel/support.html'), name='support'),
 
+    # User-facing help & manual
+    path('help/', TemplateView.as_view(template_name='help.html'), name='help'),
+    path('manual/', TemplateView.as_view(template_name='user_manual.html'), name='manual'),
+
     # Public landing page
     path('', LandingView.as_view(
         template_name='admiralty/home.html',
