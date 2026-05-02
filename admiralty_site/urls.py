@@ -89,6 +89,7 @@ urlpatterns = [
 
     # Notifications (via Keel)
     path('notifications/', include('keel.notifications.urls')),
+    path('settings/', include('keel.settings.urls')),
 
     # Helm executive dashboard feed
     path('api/v1/helm-feed/', admiralty_helm_feed, name='helm-feed'),
