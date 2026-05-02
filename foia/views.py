@@ -29,7 +29,10 @@ except ImportError:  # pragma: no cover — keel is always installed in prod
     FileSecurityValidator = None
 
 
-_FOIA_ROLES = ('foia_admin', 'foia_officer', 'foia_reviewer', 'system_admin')
+_FOIA_ROLES = (
+    'foia_admin', 'foia_officer', 'foia_reviewer', 'foia_manager',
+    'foia_attorney', 'system_admin', 'agency_admin', 'admin',
+)
 
 
 def _has_foia_role(user) -> bool:

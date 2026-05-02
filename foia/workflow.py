@@ -16,13 +16,30 @@ else:
     from keel.core.workflow import Transition, WorkflowEngine as _BaseWorkflowEngine
 
     class WorkflowEngine(_BaseWorkflowEngine):
-        @staticmethod
-        def _user_has_role(user, required_roles, obj=None):
+        # Roles that act as "any FOIA staff" — they cover every transition
+        # not pinned to a more specific role. ``agency_admin`` is included
+        # so the customer-side admin can advance the workflow without
+        # holding ``is_staff`` (Django staff = backend access, which is
+        # IT-only and should NOT be granted to agency admins).
+        _ANY_STAFF_ROLES = frozenset({
+            'system_admin', 'admin', 'agency_admin',
+            'foia_manager', 'foia_officer', 'foia_attorney',
+        })
+
+        @classmethod
+        def _user_has_role(cls, user, required_roles, obj=None):
             # ``obj`` accepted for compatibility with keel >=0.16.0
             # (see keel/core/workflow.py — base passes the bound instance
             # through so subclasses can resolve object-scoped roles).
-            # Standalone-mode override ignores it: is_staff grants all roles.
             if not required_roles or 'any' in required_roles:
+                return True
+            user_role = getattr(user, 'role', None)
+            if user_role and user_role in required_roles:
+                return True
+            # Admin-tier roles always satisfy the gate, even when not
+            # explicitly listed on the Transition (matches the standalone
+            # is_staff escape hatch for Django-staff users).
+            if user_role in cls._ANY_STAFF_ROLES:
                 return True
             if getattr(user, 'is_staff', False):
                 return True
