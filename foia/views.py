@@ -1,20 +1,17 @@
 """FOIA views — full attorney workflow from intake through response."""
-import json
-
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models as db_models
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views import generic, View
 
-from .compat import is_beacon
 from .forms import (
     FOIARequestForm, FOIAScopeForm, FOIADeterminationForm, FOIAAppealForm,
 )
@@ -269,6 +266,22 @@ class FOIATransitionView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
             messages.error(request, f'Cannot transition from {foia.get_status_display()} to {target_status}.')
             return redirect('foia:request_detail', pk=pk)
 
+        # Enforce per-transition `require_comment=True` policy. Some transitions
+        # (e.g. "Return to Search", "Return to Review") require a written
+        # justification for the audit trail. Without this check the workflow
+        # declaration was advisory only.
+        transition = next(
+            (t for t in getattr(FOIA_WORKFLOW, 'transitions', [])
+             if t.from_status == foia.status and t.to_status == target_status),
+            None,
+        )
+        if transition is not None and getattr(transition, 'require_comment', False) and not comment:
+            messages.error(
+                request,
+                f'A comment is required to transition to {dict(FOIARequest.Status.choices).get(target_status, target_status)}.',
+            )
+            return redirect('foia:request_detail', pk=pk)
+
         old_status = foia.status
         foia.status = target_status
         foia.save(update_fields=['status', 'updated_at'])
@@ -502,8 +515,23 @@ class FOIACompileResponseView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
 class FOIAAIReviewView(FOIARoleRequiredMixin, LoginRequiredMixin, View):
     """Run AI classification review on all search results."""
 
+    # Per-user-per-FOIA cooldown. Without this, an authenticated FOIA-role
+    # user can repeatedly POST to this endpoint and burn Anthropic API credit
+    # — every invocation makes one Claude call per 10 search results.
+    AI_REVIEW_COOLDOWN_SECONDS = 60
+
     def post(self, request, pk):
         foia = get_object_or_404(FOIARequest, pk=pk)
+
+        cache_key = f'foia_ai_review_cooldown:{request.user.pk}:{foia.pk}'
+        if cache.get(cache_key):
+            messages.warning(
+                request,
+                f'AI review is rate-limited to one run per {self.AI_REVIEW_COOLDOWN_SECONDS} seconds per request. Try again shortly.',
+            )
+            return redirect('foia:search_results', pk=pk)
+        cache.set(cache_key, True, self.AI_REVIEW_COOLDOWN_SECONDS)
+
         from .ai_review import review_classifications
         flags = review_classifications(foia)
 
